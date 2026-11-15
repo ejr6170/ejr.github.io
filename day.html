@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Day in the Role · Kishrei Chutz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#13294B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Libre+Baskerville:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one reading column; navy page, cream "duty log" sheet with a vertical clock rail. Single deliberate look shared with the flag game. */
+:root{
+  color-scheme: light;
+  --navy:#13294B; --navy-2:#1D3A66; --gold:#D4AF4A;
+  --paper:#F5F0E3; --paper-2:#EAE2CC; --rule:#D9CFB3;
+  --ink:#1D1A14; --ink-2:#5A5140; --blue:#0038B8;
+  --he:'Heebo','Arial Hebrew','Noto Sans Hebrew',Arial,sans-serif;
+  --en:'Libre Baskerville',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--navy);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--navy);color:var(--ink);font-family:var(--he);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px;display:flex;justify-content:center}
+.wrap{width:100%;max-width:720px;display:flex;flex-direction:column;gap:16px}
+.en{font-family:var(--en);font-style:italic;direction:ltr;unicode-bidi:isolate}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.nav a{flex:none;color:#fff;text-decoration:none;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:8px 13px;min-height:40px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.nav a .en{font-size:11px;font-weight:400;color:#C9D3E6}
+.nav a[aria-current="page"]{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.nav a[aria-current="page"] .en{color:var(--navy)}
+header{color:#fff;display:flex;flex-direction:column;gap:4px;padding:6px 2px}
+header .kicker{color:var(--gold);font-size:13px;font-weight:800;letter-spacing:1.5px}
+header h1{margin:0;font-size:clamp(30px,7vw,46px);font-weight:900;line-height:1.08;text-wrap:balance}
+header .en.t{font-size:16px;color:#E8D49A;text-align:right}
+header p{margin:6px 0 0;font-size:16px;line-height:1.55;color:#E6E9F0;max-width:60ch}
+header p.en{font-size:13px;color:#B9C4DA;margin:0}
+.note{background:#FFF4D1;border:1px solid #E6C766;color:#5A4410;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.5}
+.note .en{display:block;font-size:12px;color:#7A6020}
+.sheet{background:var(--paper);border-radius:16px;padding:22px 18px 18px;background-image:repeating-linear-gradient(135deg,rgba(19,41,75,.035) 0 2px,transparent 2px 10px)}
+.log-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1px dashed #C7BB99;padding-bottom:10px;margin-bottom:6px;font-size:13px;color:var(--ink-2)}
+.log-head b{font-family:var(--mono);font-weight:500;color:var(--navy);letter-spacing:.5px}
+ol.tl{list-style:none;margin:0;padding:0;position:relative}
+ol.tl::before{content:"";position:absolute;top:8px;bottom:8px;right:43px;width:2px;background:var(--rule)}
+.tl li{display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;padding:14px 0;position:relative}
+.time{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1}
+.time b{font-family:var(--mono);font-weight:500;font-size:15px;background:var(--navy);color:#fff;border-radius:8px;padding:4px 8px;font-variant-numeric:tabular-nums}
+.time .ic{width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--blue);display:grid;place-items:center}
+.item{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.item h2{margin:0;font-size:20px;font-weight:800;line-height:1.25;text-wrap:balance}
+.item h2 .en{display:block;font-size:13px;font-weight:400;color:var(--ink-2)}
+.item p{margin:0;font-size:16px;line-height:1.55}
+.item p.en{font-size:12.5px;line-height:1.5;color:var(--ink-2);text-align:right}
+.item .real{align-self:flex-start;font-size:11.5px;font-weight:700;color:#fff;background:var(--blue);padding:3px 10px;border-radius:999px;display:inline-flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline}
+.item .real .en{color:#E6EDFC;font-weight:400;white-space:nowrap}
+.memo{border-top:1px dashed #C7BB99;margin-top:8px;padding-top:14px;display:flex;flex-direction:column;gap:6px}
+.memo h3{margin:0;font-size:17px;font-weight:800}
+.memo h3 .en{display:block;font-size:12px;font-weight:400;color:var(--ink-2);text-align:right;margin-top:1px}
+.memo ul{margin:0;padding:0 20px 0 0;display:flex;flex-direction:column;gap:8px;font-size:15.5px;line-height:1.5}
+.memo li .en{display:block;font-size:12px;color:var(--ink-2);text-align:right}
+.cta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.cta a{min-height:56px;border-radius:12px;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:17px;line-height:1.2;padding:8px 12px;text-align:center}
+.cta a .en{font-size:11.5px;font-weight:400}
+.cta .gold{background:var(--gold);color:var(--navy);box-shadow:0 4px 0 #9C7F2E}
+.cta .line{border:2px solid rgba(255,255,255,.5);color:#fff}
+.cta .line .en{color:#C9D3E6}
+.src{font-size:11.5px;color:#8E9AB3;text-align:center;line-height:1.5}
+.src a{color:#C9D3E6}
+@media (max-width:480px){
+  .tl li{grid-template-columns:62px minmax(0,1fr);gap:10px}
+  ol.tl::before{right:30px}
+  .time b{font-size:13px;padding:3px 6px}
+  .time .ic{width:32px;height:32px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .tl li{animation:in .5s ease both}
+  @keyframes in{from{opacity:.001;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+/* photos: shown on every size when provided; the designed placeholder only on big screens */
+.ph{margin:0;border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/10;max-width:100%;background:var(--navy)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph figcaption{position:absolute;left:0;right:0;bottom:0;padding:14px 10px 6px;font-size:10.5px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));direction:ltr;text-align:left}
+.ph.empty{display:none}
+.ph.empty .ph-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#C9D3E6;
+  background:radial-gradient(120% 90% at 80% 0%,var(--sky,#2D5A9A),var(--navy) 70%)}
+.ph.empty .ph-in small{font-size:11px;font-weight:700;letter-spacing:1px;opacity:.85}
+.ph.empty .ph-in small .en{font-weight:400}
+.ph.empty .ph-in::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 2px,transparent 2px 12px)}
+.autopanel{display:none}
+.wrap{transition:opacity .6s ease}
+body.fadeout .wrap{opacity:0}
+body.fadein .wrap{animation:fin .8s ease}
+@keyframes fin{from{opacity:0}to{opacity:1}}
+.showbar{display:none}
+
+/* ===== Booth screen: horizontal timeline ===== */
+@media (min-width:1100px) and (min-height:620px){
+  body{padding-block:28px 28px}
+  .wrap{max-width:1840px;gap:20px}
+  header{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:40px}
+  header .htext{display:flex;flex-direction:column;gap:4px;min-width:0}
+  header h1{font-size:52px}
+  header p{max-width:52ch}
+  .autopanel{display:flex;align-items:center;gap:12px;flex:none;color:#E6E9F0;font-size:13px;font-weight:700}
+  .autopanel .en{font-weight:400;font-size:11px;color:#B9C4DA}
+  .autopanel button{min-height:44px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font:inherit;font-size:13px;font-weight:700;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .autopanel button[aria-pressed="true"]{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+  .autopanel button[aria-pressed="true"] .en{color:var(--navy)}
+  body{padding-block:18px 18px}
+  .wrap{gap:14px}
+  header h1{font-size:44px}
+  header p{font-size:15px;margin-top:4px}
+  .note{padding:8px 14px;font-size:13px}
+  .note .en{display:inline;margin-right:8px}
+  .src{display:none}
+  .sheet{padding:26px 26px 22px}
+  ol.tl{display:grid;grid-template-columns:repeat(var(--n,7),minmax(0,1fr));gap:16px;padding-top:6px}
+  ol.tl::before{top:22px;bottom:auto;right:0;left:0;width:auto;height:8px;border-radius:8px;
+    background:linear-gradient(to left,#F2C46B 0%,#7FB3E8 30%,#3D7CC9 60%,#E58A55 82%,#1D3A66 100%)}
+  .tl li{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:14px;padding:0}
+  .time{flex-direction:row;justify-content:center;gap:8px}
+  .time b{font-size:16px;box-shadow:0 0 0 4px var(--paper)}
+  .time .ic{box-shadow:0 0 0 4px var(--paper)}
+  .item{padding:0 0 14px;overflow:hidden;transition:transform .45s cubic-bezier(.2,.8,.3,1.1),box-shadow .45s,border-color .45s}
+  .item > :not(.ph){margin-inline:14px}
+  .item h2{font-size:19px;margin-top:4px}
+  .item p{font-size:15px;line-height:1.5}
+  .item p.en{font-size:12px}
+  .ph{border-radius:0;aspect-ratio:16/10}
+  .ph.empty{display:block}
+  .tl li.on .item{transform:translateY(-10px);border-color:var(--gold);box-shadow:0 18px 36px rgba(19,41,75,.22)}
+  .tl li.on .time b{background:var(--gold);color:var(--navy)}
+  .tl li.on .time .ic{border-color:var(--gold);background:#FFF4D1}
+  .memo{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:20px;align-items:start}
+  .memo ul{display:contents}
+  .memo li{list-style:none;margin:0;font-size:15px}
+  .cta{grid-template-columns:repeat(2,minmax(0,320px));justify-content:center}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="Site">
+    <a href="index.html">מפה <span class="en">Map</span></a>
+    <a href="day.html" aria-current="page">יום בתפקיד <span class="en">A day</span></a>
+    <a href="liaison.html">את/ה הקישור <span class="en">You're the liaison</span></a>
+    <a href="game.html">נחשו את הדגל <span class="en">Flag game</span></a>
+  </nav>
+
+  <header>
+    <div class="htext">
+      <div class="kicker">קשרי חוץ · חטיבת תבל</div>
+      <h1>יום בתפקיד: מש״ק/ית קישור לכוחות הזרים</h1>
+      <div class="en t">A day as a Liaison NCO to Foreign Forces</div>
+      <p>החוליה שמחברת בין צה״ל לבין צבאות זרים, כוחות שמירת שלום ומשלחות מחו״ל. כך יכול להיראות יום אחד בתפקיד.</p>
+      <p class="en">The link between the IDF and foreign armies, peacekeepers and visiting delegations. Here's what one day can look like.</p>
+    </div>
+    <div class="autopanel">
+      <span>הצגה אוטומטית <span class="en">Auto highlight</span></span>
+      <button type="button" id="autoBtn" aria-pressed="true">פועל <span class="en">On</span></button>
+      <button type="button" id="stopShow" hidden>עצירת המצגת <span class="en">Stop slideshow</span></button>
+    </div>
+  </header>
+
+  <div class="note" id="example-note" role="note">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A6A10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+    <div>יום לדוגמה, על פי תיאורי התפקיד שפורסמו. נעדכן אותו לפי יום אמיתי ממי ששירת בתפקיד.
+      <span class="en">Example day, based on published role descriptions. We'll update it with a real day from someone who served.</span></div>
+  </div>
+
+  <section class="sheet" aria-labelledby="loghead">
+    <div class="log-head" id="loghead"><span>יומן משמרת · <span class="en">Duty log</span></span><b id="logdate"></b></div>
+    <ol class="tl" id="tl"></ol>
+    <div class="memo">
+      <h3>מה עוזר בתפקיד <span class="en">What helps in the role</span></h3>
+      <ul>
+        <li>אנגלית ברמה גבוהה. שפות נוספות הן יתרון אמיתי.<span class="en">Strong English. Other languages are a real advantage.</span></li>
+        <li>סבלנות, סדר וייצוגיות: את/ה הפנים של צה״ל מול אורחים מחו״ל.<span class="en">Patience, organization and presence: you're the IDF's face to foreign guests.</span></li>
+        <li>להרגיש בבית בשתי תרבויות, בדיוק מה שחיילים בודדים מביאים איתם.<span class="en">Being at home in two cultures, exactly what lone soldiers bring.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="cta">
+    <a class="gold" href="liaison.html">נסו להיות הקישור<span class="en">Try being the liaison</span></a>
+    <a class="line" href="index.html">חזרה למפה<span class="en">Back to the map</span></a>
+  </div>
+  <div class="src">מקורות: מדריך התפקידים של צה״ל · DraftIDF · <a href="https://www.ynetnews.com/article/hy21gu6sxl" target="_blank" rel="noopener">Ynetnews</a></div>
+</div>
+
+<script>
+/* ===== Edit after your interview =====
+   isExample: set to false once the entries come from someone who served.
+   photo: optional. Put image files in an "images" folder next to this page and write e.g. photo:"images/briefing.jpg",
+          with credit:"IDF Spokesperson's Unit" (or the photographer). Only use photos you have permission to use.
+   sky: the placeholder's tint for that time of day (used only while there's no photo).
+   Each entry: time, icon (one of: brief, plan, people, phone, field, truck, report, flag), he/en title, he/en text.
+   real: true marks a detail confirmed by a published source or your interview. */
+var CONFIG = {
+  isExample: true,
+  entries: [
+    {time:"07:30", icon:"brief", photo:"images/day-1.jpg", credit:"IDF Spokesperson's Unit / Wikimedia Commons", he:"תדריך בוקר", en:"Morning briefing",
+     heText:"מה על הלוח היום: ביקורי משלחות, תרגילים משותפים ותיאומים עם כוחות זרים.", enText:"What's on today: delegation visits, joint exercises and coordination with foreign forces."},
+    {time:"09:00", icon:"plan", photo:"images/day-2.jpg", credit:"Wikimedia Commons", he:"הכנה לביקור משלחת", en:"Preparing a delegation visit",
+     heText:"לוח זמנים, הסעות, אישורי כניסה ודגשי פרוטוקול לקצינים מצבא שותף.", enText:"Schedule, transport, entry permits and protocol notes for officers from a partner army."},
+    {time:"10:30", icon:"people", photo:"images/day-3.jpg", credit:"Israeli archive / Wikimedia Commons", he:"ליווי המשלחת", en:"Escorting the delegation",
+     heText:"מקבלים את האורחים, מלווים אותם בבסיס ומגשרים בין הצדדים, בשפה ובתרבות.", enText:"Greet the guests, escort them on base and bridge between the sides, in language and in culture."},
+    {time:"13:00", icon:"phone", photo:"images/day-4.jpg", credit:"IDF Spokesperson's Unit / Wikimedia Commons", he:"תיאום עם כוחות בינלאומיים", en:"Coordinating with international forces",
+     heText:"עבודה מול צבאות זרים וכוחות שמירת שלום, כדי שכל צד יודע מה השני עושה.", enText:"Working with foreign armies and peacekeeping forces so each side knows what the other is doing.", real:true},
+    {time:"15:00", icon:"flag", photo:"images/day-5.jpg", credit:"IDF Spokesperson's Unit / Wikimedia Commons", he:"תיאום תרגיל משותף", en:"Coordinating a joint exercise",
+     heText:"תיאום אימונים משותפים וניסויים צבאיים בארץ ובחו״ל.", enText:"Coordinating joint training exercises and military trials in Israel and abroad.", real:true},
+    {time:"17:00", icon:"truck", photo:"images/day-6.jpg", credit:"IDF Spokesperson's Unit / Wikimedia Commons", he:"משימה במעבר", en:"A crossing assignment",
+     heText:"יש מש״קי קישור שבודקים משאיות, מזהים נהגים ומלווים שיירות למעברים.", enText:"Some liaison NCOs inspect trucks, identify drivers and escort convoys to the crossings.", real:true},
+    {time:"19:30", icon:"report", photo:"images/day-7.jpg", credit:"IDF Spokesperson's Unit / Wikimedia Commons", he:"סיכום יום", en:"End-of-day report",
+     heText:"מעדכנים את המפקדים ואת הצד השני, ומכינים את מחר.", enText:"Update the commanders and the partner side, and prepare for tomorrow."}
+  ]
+};
+(function(){
+  var ICONS = {
+    brief:'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12.5h5"/>',
+    plan:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>',
+    people:'<circle cx="9" cy="8" r="3"/><path d="M3.5 19c.8-3.2 3-5 5.5-5s4.7 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.4.2 4.2 1.8 5 4.8"/>',
+    phone:'<path d="M5 4h4l1.5 4-2.5 1.5a11 11 0 0 0 6.5 6.5L16 13.5l4 1.5v4a1.5 1.5 0 0 1-1.6 1.5C10.6 20 4 13.4 3.5 5.6A1.5 1.5 0 0 1 5 4z"/>',
+    flag:'<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
+    truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+    report:'<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 15.5h7M9 9h3"/>',
+    field:'<circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/>'
+  };
+  document.getElementById('example-note').hidden = !CONFIG.isExample;
+  var d = new Date(); document.getElementById('logdate').textContent = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
+  var tl = document.getElementById('tl');
+  CONFIG.entries.forEach(function(e, i){
+    var li = document.createElement('li'); li.style.animationDelay = (i*70)+'ms';
+    var t = document.createElement('div'); t.className = 'time';
+    var tb = document.createElement('b'); tb.textContent = e.time; t.appendChild(tb);
+    var ic = document.createElement('span'); ic.className = 'ic';
+    ic.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0038B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[e.icon] || ICONS.field) + '</svg>';
+    t.appendChild(ic); li.appendChild(t);
+    var it = document.createElement('div'); it.className = 'item';
+    var fig = document.createElement('figure'); fig.className = 'ph' + (e.photo ? '' : ' empty');
+    var skies = ['#C98A3A','#2D6CB5','#3D7CC9','#2F70B8','#2A5FA3','#B5653A','#1D3A66'];
+    function placeholder(){
+      fig.innerHTML = ''; fig.className = 'ph empty';
+      fig.style.setProperty('--sky', e.sky || skies[i % skies.length]);
+      var pin = document.createElement('div'); pin.className = 'ph-in';
+      pin.innerHTML = '<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#E6E9F0" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[e.icon] || ICONS.field) + '</svg>';
+      var sm = document.createElement('small'); sm.textContent = 'תמונה בקרוב · '; var sme = document.createElement('span'); sme.className = 'en'; sme.textContent = 'Photo coming'; sm.appendChild(sme); pin.appendChild(sm);
+      fig.appendChild(pin); fig.setAttribute('aria-hidden', 'true');
+    }
+    if (e.photo){
+      var img = document.createElement('img'); img.alt = e.en; img.addEventListener('error', placeholder); img.src = e.photo; fig.appendChild(img);
+      if (e.credit){ var fc = document.createElement('figcaption'); fc.textContent = 'Photo: ' + e.credit; fig.appendChild(fc); }
+    } else placeholder();
+    it.appendChild(fig);
+    var h = document.createElement('h2'); h.textContent = e.he; var hs = document.createElement('span'); hs.className = 'en'; hs.textContent = e.en; h.appendChild(hs); it.appendChild(h);
+    var p = document.createElement('p'); p.textContent = e.heText; it.appendChild(p);
+    var pe = document.createElement('p'); pe.className = 'en'; pe.textContent = e.enText; it.appendChild(pe);
+    if (e.real && CONFIG.isExample){ var r = document.createElement('span'); r.className = 'real'; r.textContent = 'מתוך תיאור התפקיד'; var rs = document.createElement('span'); rs.className = 'en'; rs.textContent = 'From the role description'; r.appendChild(rs); it.appendChild(r); }
+    li.appendChild(it); tl.appendChild(li);
+  });
+  tl.style.setProperty('--n', CONFIG.entries.length);
+
+  /* booth highlight: steps through the day on big screens; pauses while someone is touching the page */
+  var items = tl.children, k = 0, timer = null, idle = null, on = true;
+  var btn = document.getElementById('autoBtn');
+  var big = window.matchMedia('(min-width:1100px) and (min-height:620px)');
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+  try { if (localStorage.getItem('kc-day-auto') === 'off') on = false; } catch (e) {}
+  var showMode = location.hash === '#slideshow';
+  var stopShow = document.getElementById('stopShow');
+  if (showMode){ on = true; document.body.classList.add('fadein'); stopShow.hidden = false; }
+  stopShow.addEventListener('click', function(){ showMode = false; stopShow.hidden = true; try { location.hash = ''; } catch (e) {} });
+  function leave(url){ stop(); document.body.classList.add('fadeout'); setTimeout(function(){ location.href = url; }, 650); }
+  function mark(i){ for (var j = 0; j < items.length; j++) items[j].classList.toggle('on', j === i); }
+  function stop(){ clearInterval(timer); timer = null; }
+  function start(){ stop(); if (!on || !big.matches || still.matches) { mark(-1); if (showMode && !big.matches) setTimeout(function(){ if (showMode) leave('index.html#slideshow'); }, 20000); return; } mark(k); timer = setInterval(function(){
+    if (showMode && k === items.length - 1) { leave('index.html#slideshow'); return; }
+    k = (k + 1) % items.length; mark(k); }, 4500); }
+  function render(){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.firstChild.textContent = on ? 'פועל ' : 'כבוי '; btn.lastChild.textContent = on ? 'On' : 'Off'; }
+  btn.addEventListener('click', function(){ on = !on; try { localStorage.setItem('kc-day-auto', on ? 'on' : 'off'); } catch (e) {} render(); start(); });
+  Array.prototype.forEach.call(items, function(li, i){
+    li.addEventListener('pointerenter', function(){ if (!big.matches) return; stop(); k = i; mark(i); clearTimeout(idle); idle = setTimeout(start, 20000); });
+  });
+  if (big.addEventListener) big.addEventListener('change', start);
+  render(); start();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>You're the Liaison · Kishrei Chutz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#13294B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Libre+Baskerville:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one phone-width column; each situation arrives as a cream "message slip" with a radio-call header, choices as big tap targets. Shares the passport palette. */
+:root{
+  color-scheme: light;
+  --navy:#13294B; --navy-2:#1D3A66; --gold:#D4AF4A;
+  --paper:#F5F0E3; --paper-2:#EAE2CC; --rule:#D9CFB3;
+  --ink:#1D1A14; --ink-2:#5A5140; --blue:#0038B8;
+  --good:#1F7A4A; --mid:#8A5A12; --bad:#B3261E;
+  --he:'Heebo','Arial Hebrew','Noto Sans Hebrew',Arial,sans-serif;
+  --en:'Libre Baskerville',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--navy);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--navy);color:var(--ink);font-family:var(--he);-webkit-tap-highlight-color:transparent;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 28px;display:flex;justify-content:center}
+.wrap{width:100%;max-width:520px;display:flex;flex-direction:column;gap:14px}
+.en{font-family:var(--en);font-style:italic;direction:ltr;unicode-bidi:isolate}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+[hidden]{display:none!important}
+.nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.nav a{flex:none;color:#fff;text-decoration:none;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:8px 13px;min-height:40px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.nav a .en{font-size:11px;font-weight:400;color:#C9D3E6}
+.nav a[aria-current="page"]{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.nav a[aria-current="page"] .en{color:var(--navy)}
+
+.intro{background:linear-gradient(160deg,var(--navy-2),var(--navy));border:1px solid rgba(212,175,74,.4);border-radius:18px;padding:28px 22px 22px;color:#fff;display:flex;flex-direction:column;gap:14px;text-align:center;align-items:center}
+.radio{width:96px;height:96px}
+.intro .kicker{color:var(--gold);font-size:13px;font-weight:800;letter-spacing:1.5px}
+.intro h1{margin:0;font-size:36px;font-weight:900;line-height:1.08;text-wrap:balance}
+.intro .en.t{color:#E8D49A;font-size:16px}
+.intro p{margin:0;font-size:16px;line-height:1.55;color:#E6E9F0;max-width:34ch}
+.intro p.en{font-size:12.5px;color:#B9C4DA}
+.callsign{font-family:var(--mono);font-size:12px;color:rgba(212,175,74,.8);letter-spacing:1px;direction:ltr}
+.primary{width:100%;min-height:56px;border:0;border-radius:14px;background:var(--gold);color:var(--navy);font-weight:900;font-size:19px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;box-shadow:0 4px 0 #9C7F2E}
+.primary .en{font-size:12px;font-weight:400}
+.primary:active{transform:translateY(2px);box-shadow:0 2px 0 #9C7F2E}
+.disclaimer{font-size:12px;color:#B9C4DA;line-height:1.5}
+
+.slip{background:var(--paper);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.slip-head{background:var(--paper-2);border-bottom:1px dashed #C7BB99;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--mono);font-size:12.5px;color:var(--navy)}
+.slip-head .pts{background:#fff;border:1px solid var(--rule);border-radius:999px;padding:3px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.slip-body{padding:18px 16px 16px;display:flex;flex-direction:column;gap:14px;background-image:repeating-linear-gradient(135deg,rgba(19,41,75,.03) 0 2px,transparent 2px 10px)}
+.where{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--blue)}
+.where .en{font-weight:400;font-size:11.5px;color:var(--ink-2)}
+.sit h2{margin:0;font-size:22px;font-weight:800;line-height:1.3;text-wrap:balance}
+.sit p{margin:6px 0 0;font-size:16.5px;line-height:1.55}
+.sit p.en{font-size:13px;line-height:1.5;color:var(--ink-2);text-align:right;margin-top:4px}
+.ask{font-size:15px;font-weight:800;color:var(--navy);border-top:1px solid var(--rule);padding-top:12px}
+.ask .en{display:block;font-weight:400;font-size:12px;color:var(--ink-2);text-align:right}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{min-height:60px;width:100%;border:2px solid var(--rule);background:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;text-align:right;transition:transform .12s ease,border-color .2s,background .2s}
+.choice:active{transform:scale(.985)}
+.choice .letter{flex:none;width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-family:var(--mono);font-size:14px;display:grid;place-items:center}
+.choice .tx{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.choice .tx b{font-size:16px;font-weight:700;line-height:1.35}
+.choice .tx .en{font-size:12px;color:var(--ink-2)}
+.choice.best{border-color:var(--good);background:#E7F3EC}.choice.best .letter{background:var(--good)}
+.choice.ok{border-color:var(--mid);background:#F8EEDC}.choice.ok .letter{background:var(--mid)}
+.choice.miss{border-color:var(--bad);background:#FBE9E7}.choice.miss .letter{background:var(--bad)}
+.choice.dim{opacity:.6}
+.choice .badge{flex:none;font-size:11px;font-weight:800;border-radius:999px;padding:3px 8px;color:#fff}
+.fb{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;animation:rise .35s ease}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.verdict{font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.verdict .en{font-size:12px;font-weight:400}
+.v-best{color:var(--good)}.v-ok{color:var(--mid)}.v-miss{color:var(--bad)}
+.fb p{margin:0;font-size:15.5px;line-height:1.55}
+.fb p.en{font-size:12.5px;line-height:1.5;color:var(--ink-2);text-align:right}
+.lesson{font-size:13px;font-weight:800;color:#fff;background:var(--blue);border-radius:8px;padding:8px 10px;line-height:1.45}
+.lesson .en{display:block;font-weight:400;color:#E6EDFC;font-size:11.5px;text-align:right}
+.next{min-height:52px;border:0;border-radius:12px;background:var(--navy);color:#fff;font-weight:800;font-size:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
+.next .en{font-size:11px;color:#C9D3E6;font-weight:400}
+
+.result{background:var(--paper);border-radius:14px;padding:22px 16px 16px;display:flex;flex-direction:column;gap:14px}
+.score-big{text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center}
+.score-big .n{font-family:var(--mono);font-size:54px;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
+.score-big .of{font-size:13px;color:var(--ink-2)}
+.score-big .rank{font-size:26px;font-weight:900;line-height:1.15;margin-top:6px;text-wrap:balance}
+.score-big .rank-en{font-size:14px;color:var(--ink-2)}
+.score-big p{margin:6px 0 0;font-size:15px;line-height:1.5;max-width:36ch}
+.score-big p.en{font-size:12px;color:var(--ink-2);margin:0}
+.lessons{display:flex;flex-direction:column;gap:8px;border-top:1px dashed #C7BB99;padding-top:12px}
+.lessons h3{margin:0;font-size:15px;font-weight:800}
+.lessons h3 .en{display:block;font-size:12px;font-weight:400;color:var(--ink-2);text-align:right}
+.lessons li{font-size:14.5px;line-height:1.5}
+.lessons li .en{display:block;font-size:11.5px;color:var(--ink-2);text-align:right}
+.lessons ol{margin:0;padding:0 20px 0 0;display:flex;flex-direction:column;gap:8px}
+.mark{display:inline-block;width:10px;height:10px;border-radius:50%;margin-left:6px;vertical-align:middle}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row > *{flex:1 1 150px}
+.ghost{min-height:52px;border:2px solid var(--navy);background:transparent;color:var(--navy);border-radius:12px;font-weight:800;font-size:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;text-decoration:none}
+.ghost .en{font-size:11px;font-weight:400;color:var(--ink-2)}
+.credit{font-size:11px;color:#8E9AB3;text-align:center;line-height:1.5}
+.mute{position:fixed;left:calc(14px + env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(19,41,75,.92);color:#fff;display:grid;place-items:center;cursor:pointer;z-index:30;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.mute[aria-pressed="true"]{color:#E8D49A}
+body{padding-bottom:84px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="Site">
+    <a href="index.html">מפה <span class="en">Map</span></a>
+    <a href="day.html">יום בתפקיד <span class="en">A day</span></a>
+    <a href="liaison.html" aria-current="page">את/ה הקישור <span class="en">You're the liaison</span></a>
+    <a href="game.html">נחשו את הדגל <span class="en">Flag game</span></a>
+  </nav>
+
+  <section id="s-intro" class="intro">
+    <div class="kicker">קשרי חוץ · משחק תרחישים</div>
+    <svg class="radio" viewBox="0 0 96 96" aria-hidden="true">
+      <rect x="22" y="30" width="52" height="54" rx="8" fill="none" stroke="#D4AF4A" stroke-width="3"/>
+      <path d="M58 30 70 8" stroke="#D4AF4A" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="48" cy="52" r="10" fill="none" stroke="#D4AF4A" stroke-width="2.5"/>
+      <path d="M32 72h32" stroke="#D4AF4A" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M78 22a14 14 0 0 1 0 18M84 16a22 22 0 0 1 0 30" fill="none" stroke="#D4AF4A" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+    <h1>את/ה הקישור</h1>
+    <div class="en t">You're the Liaison</div>
+    <p>6 מצבים מהשטח. בכל אחד: מה הייתם עושים? אין תשובה ״מושלמת״, אבל יש דרך של קישור טוב.</p>
+    <p class="en">Six situations. In each one, what would you do? There's no perfect answer, but there is a good liaison's way.</p>
+    <button type="button" class="primary" id="start">קיבלתי, מתחילים<span class="en">Copy that, let's start</span></button>
+    <div class="disclaimer">תרחישים לדוגמה, להמחשת אופי התפקיד · <span class="en">Example situations, to show what the role is like</span></div>
+    <div class="callsign">LIAISON-1 · CHANNEL OPEN</div>
+  </section>
+
+  <section id="s-play" class="slip" hidden aria-live="polite">
+    <div class="slip-head"><span id="sitno"></span><span class="pts" id="pts"></span></div>
+    <div class="slip-body">
+      <div class="where" id="where"></div>
+      <div class="sit"><h2 id="sit-he"></h2><p id="sit-text-he"></p><p class="en" id="sit-text-en"></p></div>
+      <div class="ask">מה עושים? <span class="en">What do you do?</span></div>
+      <div class="choices" id="choices"></div>
+      <div id="fb" hidden></div>
+    </div>
+  </section>
+
+  <section id="s-end" class="result" hidden>
+    <div class="score-big">
+      <div class="n" id="final"></div>
+      <div class="of">נקודות דיפלומטיה · <span class="en">diplomacy points</span></div>
+      <div class="rank" id="rank"></div>
+      <div class="rank-en en" id="rank-en"></div>
+      <p id="rank-text"></p>
+      <p class="en" id="rank-text-en"></p>
+    </div>
+    <div class="lessons">
+      <h3>מה קישור טוב עושה <span class="en">What a good liaison does</span></h3>
+      <ol id="lessons"></ol>
+    </div>
+    <div class="row">
+      <button type="button" class="primary" id="again">שחקו שוב<span class="en">Play again</span></button>
+      <a class="ghost" href="day.html">יום בתפקיד<span class="en">A day in the role</span></a>
+    </div>
+    <a class="ghost" href="game.html">עכשיו: נחשו את הדגל<span class="en">Next: Guess the Flag</span></a>
+  </section>
+
+  <div class="credit">קשרי חוץ · Garin Tzabar IDF Jobs Fair<br>תרחישים לדוגמה בלבד · Example situations only</div>
+</div>
+
+<button type="button" class="mute" id="mute" aria-pressed="false" aria-label="השתקה · Mute"></button>
+<script>
+/* ===== Sound: two files in /sounds plus effects made in the browser. Mute is remembered on this phone. ===== */
+var SND = (function(){
+  var muted = false, ctx = null, els = {};
+  var FILES = { sababa: 'sounds/sababa.mp3', win: 'sounds/celebrate.mp3' };
+  try { muted = localStorage.getItem('kc-mute') === '1'; } catch (e) {}
+  function ac(){ if (!ctx){ var C = window.AudioContext || window.webkitAudioContext; if (C) ctx = new C(); } if (ctx && ctx.state === 'suspended') ctx.resume(); return ctx; }
+  function tone(freq, start, dur, type, vol){ var c = ac(); if (!c) return; var t = c.currentTime + start, o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(freq, t); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.3, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.02); }
+  var api = {
+    file: function(n, vol){ if (muted) return; try { var a = els[n] || (els[n] = new Audio(FILES[n])); a.volume = vol || 1; a.currentTime = 0; var p = a.play(); if (p && p.catch) p.catch(function(){}); } catch (e) {} },
+    stop: function(n){ var a = els[n]; if (a) { try { a.pause(); } catch (e) {} } },
+    // "sababa" plays only when an answer is picked; other buttons stay silent
+    tap: function(){ api.file('sababa', 0.9); },
+    blip: function(){},
+    unlock: function(){ ac(); },
+    isMuted: function(){ return muted; },
+    setMuted: function(m){ muted = m; try { localStorage.setItem('kc-mute', m ? '1' : '0'); } catch (e) {} if (m) { for (var k in els) api.stop(k); } }
+  };
+  return api;
+})();
+(function(){
+  var b = document.getElementById('mute');
+  var ON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  var OFF = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>';
+  function r(){ var m = SND.isMuted(); b.innerHTML = m ? OFF : ON; b.setAttribute('aria-pressed', m ? 'true' : 'false'); b.setAttribute('aria-label', m ? 'הפעלת צלילים · Sound on' : 'השתקה · Mute'); }
+  b.addEventListener('click', function(){ SND.setMuted(!SND.isMuted()); r(); if (!SND.isMuted()) SND.tap(); });
+  r();
+})();
+</script>
+<script>
+/* Situations: three choices each. score 10 = the liaison's way, 5 = understandable but not ideal, 0 = creates a problem. */
+var SITUATIONS = [
+  { where:{he:"בסיס בצפון", en:"A base in the north"},
+    he:"המשלחת הגיעה מוקדם", en:"The delegation is early",
+    text_he:"משלחת קצינים מצבא שותף נחתה שעה לפני הזמן. המפקד שאמור לארח אותם נמצא בישיבה.",
+    text_en:"A delegation of officers from a partner army landed an hour early. The commander hosting them is in a meeting.",
+    choices:[
+      {he:"מבקשים מהם לחכות בשדה התעופה עד השעה המתוכננת", en:"Ask them to wait at the airport until the planned time", score:0,
+       why_he:"האורחים ירגישו לא רצויים כבר מהרגע הראשון. הרושם הראשון הוא חלק מהמשימה.", why_en:"Your guests will feel unwelcome from minute one. First impressions are part of the mission."},
+      {he:"מקבלים אותם, מעדכנים את לשכת המפקד ומתאימים את לוח הזמנים", en:"Welcome them, update the commander's office and adjust the schedule", score:10,
+       why_he:"בדיוק. קישור טוב דואג לאורחים ומעדכן את כל הצדדים, בלי לאלתר החלטות שאינן שלו.", why_en:"Exactly. A good liaison takes care of the guests and keeps everyone informed, without improvising decisions that aren't theirs."},
+      {he:"מתחילים בעצמכם את התדריך הרשמי במקום המפקד", en:"Start the official briefing yourself instead of the commander", score:5,
+       why_he:"כוונה טובה, אבל התדריך הוא של המפקד. אפשר לארח, להציג את הבסיס ולהכין, לא להחליף אותו.", why_en:"Good intentions, but the briefing is the commander's. You can host, show the base and prepare, not replace them."}],
+    lesson:{he:"דואגים לאורחים ומעדכנים את כולם", en:"Take care of the guests and keep everyone informed"} },
+  { where:{he:"תרגיל משותף", en:"A joint exercise"},
+    he:"אי-הבנה בקשר", en:"A mix-up on the radio",
+    text_he:"באמצע תרגיל משותף, קצין זר הבין הוראה ״להחזיק עמדה״ כ״לסגת״. הכוח שלו מתחיל לזוז.",
+    text_en:"Mid-exercise, a foreign officer understood “hold position” as “withdraw”. His unit is starting to move.",
+    choices:[
+      {he:"שותקים. זה רק תרגיל וזה יסתדר", en:"Stay quiet. It's only an exercise, it will sort itself out", score:0,
+       why_he:"בתרגיל לומדים את מה שיקרה באמת. טעות שלא מתקנים עכשיו תחזור.", why_en:"Exercises are where the real thing gets learned. An error you don't fix now will come back."},
+      {he:"עוצרים, מסבירים שוב באנגלית פשוטה ומבקשים שיחזור על ההוראה", en:"Pause, say it again in plain English and ask him to repeat it back", score:10,
+       why_he:"נכון. משפטים קצרים, מילים פשוטות, ובקשה לחזור על ההוראה כדי לוודא שהיא הובנה.", why_en:"Right. Short sentences, simple words, and a read-back to confirm the order was understood."},
+      {he:"מדווחים למפקד שהקצין הזר טעה", en:"Report to the commander that the foreign officer got it wrong", score:5,
+       why_he:"צריך לעדכן, אבל קודם מתקנים את המצב בשטח. ואין צורך לחפש אשמים: התפקיד שלכם הוא לגשר.", why_en:"You should report it, but fix the situation first. And there's no need to assign blame: your job is to bridge."}],
+    lesson:{he:"מדברים פשוט ומוודאים הבנה", en:"Speak simply and confirm understanding"} },
+  { where:{he:"מעבר גבול", en:"A border crossing"},
+    he:"המסמכים לא תואמים", en:"The papers don't match",
+    text_he:"משאית סיוע בדרך לעזה. השם בתעודה של הנהג לא תואם לשם ברשימה. כולם לחוצים לסיים.",
+    text_en:"An aid truck is headed to Gaza. The name on the driver's ID doesn't match the manifest. Everyone wants to finish fast.",
+    choices:[
+      {he:"מעבירים. זה סיוע הומניטרי ודחוף", en:"Let it through. It's humanitarian aid and it's urgent", score:0,
+       why_he:"הנהלים קיימים בשביל הביטחון של כולם, גם כשממהרים. דווקא אז.", why_en:"Procedures exist for everyone's safety, even when you're in a hurry. Especially then."},
+      {he:"מתווכחים עם הנהג עד שיסביר", en:"Argue with the driver until he explains", score:5,
+       why_he:"הבירור חשוב, אבל ויכוח מסלים מצב. עוצרים לפי הנוהל ומערבים את מי שצריך.", why_en:"Checking matters, but an argument escalates. Stop according to procedure and bring in the right people."},
+      {he:"עוצרים את המשאית לפי הנוהל ומעדכנים את המפקד ואת נציג הצד השני", en:"Hold the truck by procedure and update your commander and the partner's liaison", score:10,
+       why_he:"נכון. עוצרים, פועלים לפי הנוהל ומשתפים את שני הצדדים כדי לפתור את זה מהר ובבטחה.", why_en:"Right. Hold it, follow procedure, and loop in both sides to resolve it quickly and safely."}],
+    lesson:{he:"נוהלים לא מדלגים, גם בלחץ", en:"Don't skip procedure, even under pressure"} },
+  { where:{he:"ביקור רשמי", en:"An official visit"},
+    he:"ארוחת צהריים למשלחת", en:"Lunch for the delegation",
+    text_he:"משלחת מגיעה מחר לביקור של יום שלם. מתכננים ארוחת צהריים בחדר האוכל.",
+    text_en:"A delegation arrives tomorrow for a full-day visit. You're planning lunch in the dining hall.",
+    choices:[
+      {he:"בודקים מראש העדפות והגבלות תזונה ודואגים לאפשרויות מתאימות", en:"Check dietary needs and restrictions in advance and arrange suitable options", score:10,
+       why_he:"בדיוק. פרטים קטנים כמו אוכל, זמני תפילה ודגלים נכונים בונים אמון גדול.", why_en:"Exactly. Small details like food, prayer times and the right flags build big trust."},
+      {he:"מגישים את מה שיש. אוכל זה אוכל", en:"Serve whatever's on the menu. Food is food", score:0,
+       why_he:"לאורחים יכולות להיות מגבלות דת או בריאות. פספוס כזה זוכרים.", why_en:"Guests may have religious or health restrictions. A miss like that gets remembered."},
+      {he:"שואלים אותם כשהם כבר בחדר האוכל", en:"Ask them once they're already in the dining hall", score:5,
+       why_he:"עדיף מכלום, אבל ברגע האחרון כבר אין פתרונות טובים. תכנון מראש חוסך מבוכה.", why_en:"Better than nothing, but at the last minute there are no good fixes. Planning ahead saves embarrassment."}],
+    lesson:{he:"פרטים קטנים בונים אמון", en:"Small details build trust"} },
+  { where:{he:"שיחה בהפסקה", en:"A chat on a break"},
+    he:"שאלה רגישה", en:"A sensitive question",
+    text_he:"קצין זר חביב, שכבר נהייתם חברים, שואל על נושא מבצעי שאינכם מורשים לשתף.",
+    text_en:"A friendly foreign officer, who you've gotten close to, asks about an operational topic you're not cleared to share.",
+    choices:[
+      {he:"עונים בקצרה. הוא שותף, ולא נעים לסרב", en:"Answer briefly. He's a partner and it's awkward to refuse", score:0,
+       why_he:"גם מול שותפים יש גבולות. מה שמותר לשתף נקבע בערוצים המסודרים, לא בשיחה בהפסקה.", why_en:"Even with partners there are limits. What can be shared is decided through proper channels, not over coffee."},
+      {he:"מסבירים בנימוס שזה מחוץ לתחום שלכם ומציעים להעביר את השאלה לגורם המתאים", en:"Politely explain it's outside your scope and offer to pass the question to the right person", score:10,
+       why_he:"נכון. שומרים על הקשר ועל הגבולות גם יחד, והשאלה מגיעה למי שיכול לענות.", why_en:"Right. You keep both the relationship and the boundary, and the question reaches someone who can answer."},
+      {he:"מחליפים נושא ומתעלמים מהשאלה", en:"Change the subject and ignore the question", score:5,
+       why_he:"לא חשפתם כלום, אבל התעלמות יכולה להיראות כחוסר אמון. עדיף להגיד בגלוי ״זה לא אצלי״.", why_en:"You didn't reveal anything, but ignoring it can look like distrust. Better to say openly that it's not yours to share."}],
+    lesson:{he:"שומרים על הקשר ועל הגבולות", en:"Keep the relationship and the boundaries"} },
+  { where:{he:"גזרת הגבול", en:"The border sector"},
+    he:"בקשה מכוח שמירת השלום", en:"A request from peacekeepers",
+    text_he:"סיור של כוח שמירת שלום של האו״ם מבקש לנוע הלילה באזור שבו מתוכננת פעילות של צה״ל.",
+    text_en:"A UN peacekeeping patrol asks to move tonight through an area where IDF activity is planned.",
+    choices:[
+      {he:"מאשרים בעצמכם. הם כוח בינלאומי", en:"Approve it yourself. They're an international force", score:0,
+       why_he:"ההחלטה שייכת לפיקוד. אישור עצמאי עלול לסכן את הסיור ואת הכוחות.", why_en:"The decision belongs to command. Approving it yourself could endanger the patrol and the troops."},
+      {he:"מסרבים מיד, בלי לבדוק", en:"Refuse right away without checking", score:5,
+       why_he:"שמרתם על זהירות, אבל גם סגרתם ערוץ. אולי אפשר לתאם שעה או מסלול אחר.", why_en:"You were careful, but you also shut a channel. Maybe a different time or route could work."},
+      {he:"מעבירים את הבקשה דרך ערוץ הקישור לפיקוד, ומחזירים להם תשובה ברורה", en:"Pass the request through the liaison channel to command, and give them a clear answer back", score:10,
+       why_he:"זה בדיוק התפקיד: להיות הערוץ. הפיקוד מחליט, ואתם דואגים שכולם יודעים מה קורה ומתי.", why_en:"That's the job: being the channel. Command decides, and you make sure everyone knows what's happening and when."}],
+    lesson:{he:"אתם הערוץ. הפיקוד מחליט", en:"You're the channel. Command decides"} }
+];
+
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var LETTERS = ['א','ב','ג'];
+  var st;
+  function txt(tag, cls, t){ var e = document.createElement(tag); if (cls) e.className = cls; e.textContent = t; return e; }
+  function show(id){ ['s-intro','s-play','s-end'].forEach(function(s){ $(s).hidden = s !== id; }); window.scrollTo(0,0); }
+  function buzz(p){ try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+  function shuffle(a){ a = a.slice(); for (var i = a.length-1; i > 0; i--){ var j = Math.floor(Math.random()*(i+1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+  function start(){ SND.stop('win'); st = {k:0, pts:0, picks:[]}; show('s-play'); render(); }
+  function render(){
+    var s = SITUATIONS[st.k];
+    $('sitno').textContent = 'מצב ' + (st.k+1) + '/' + SITUATIONS.length + ' · SITUATION ' + (st.k+1);
+    $('pts').textContent = st.pts + ' pts';
+    var w = $('where'); w.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0038B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/></svg>';
+    w.appendChild(txt('span','',s.where.he)); w.appendChild(txt('span','en',s.where.en));
+    $('sit-he').textContent = s.he; $('sit-he').appendChild(txt('span','en', s.en)); $('sit-he').lastChild.style.cssText = 'display:block;font-size:13px;font-weight:400;color:#5A5140;margin-top:2px;text-align:right';
+    $('sit-text-he').textContent = s.text_he; $('sit-text-en').textContent = s.text_en;
+    var c = $('choices'); c.innerHTML = '';
+    var order = shuffle(s.choices);
+    order.forEach(function(ch, i){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'choice';
+      b.appendChild(txt('span','letter',LETTERS[i]));
+      var tx = document.createElement('span'); tx.className = 'tx'; tx.appendChild(txt('b','',ch.he)); tx.appendChild(txt('span','en',ch.en)); b.appendChild(tx);
+      b.addEventListener('click', function(){ pick(ch, b, order); });
+      c.appendChild(b);
+    });
+    $('fb').hidden = true; $('fb').innerHTML = '';
+  }
+  function pick(ch, btn, order){
+    if (!$('fb').hidden) return;
+    st.pts += ch.score; st.picks.push(ch.score);
+    var cls = function(sc){ return sc === 10 ? 'best' : sc === 5 ? 'ok' : 'miss'; };
+    Array.prototype.forEach.call($('choices').children, function(b, i){
+      b.disabled = true; var sc = order[i].score;
+      if (b === btn || sc === 10){ b.classList.add(cls(sc)); var bd = txt('span','badge', sc === 10 ? '+10' : sc === 5 ? '+5' : '+0'); bd.dir = 'ltr'; bd.style.background = sc === 10 ? '#1F7A4A' : sc === 5 ? '#8A5A12' : '#B3261E'; b.appendChild(bd); }
+      else b.classList.add('dim');
+    });
+    $('pts').textContent = st.pts + ' pts';
+    buzz(ch.score === 10 ? 30 : [50,40,50]);
+    SND.unlock();
+    SND.tap();
+    var s = SITUATIONS[st.k], f = $('fb'); f.className = 'fb'; f.innerHTML = '';
+    var v = document.createElement('div'); v.className = 'verdict v-' + cls(ch.score);
+    v.appendChild(document.createTextNode(ch.score === 10 ? 'הדרך של קישור טוב' : ch.score === 5 ? 'כמעט' : 'זה עלול ליצור בעיה'));
+    v.appendChild(txt('span','en', ch.score === 10 ? "A good liaison's call" : ch.score === 5 ? 'Close' : 'That could cause a problem'));
+    f.appendChild(v);
+    f.appendChild(txt('p','',ch.why_he)); f.appendChild(txt('p','en',ch.why_en));
+    var l = txt('div','lesson', s.lesson.he); l.appendChild(txt('span','en', s.lesson.en)); f.appendChild(l);
+    var last = st.k === SITUATIONS.length - 1;
+    var n = document.createElement('button'); n.type = 'button'; n.className = 'next';
+    n.appendChild(document.createTextNode(last ? 'לסיכום' : 'למצב הבא')); n.appendChild(txt('span','en', last ? 'See your debrief' : 'Next situation'));
+    n.addEventListener('click', function(){ if (last) finish(); else { st.k++; render(); } });
+    f.appendChild(n); f.hidden = false;
+    setTimeout(function(){ try { f.scrollIntoView({behavior:'smooth', block:'nearest'}); } catch (e) {} }, 120);
+  }
+  function finish(){
+    var max = SITUATIONS.length * 10, p = st.pts;
+    var R = p >= 55 ? ['קצין/ת קישור מצטיין/ת','Outstanding Liaison','חשבתם כמו מי שעושה את זה כל יום: דואגים לאנשים, שומרים על נהלים ומעדכנים את כולם.',"You thought like someone who does this every day: care for people, keep to procedure, keep everyone informed."]
+          : p >= 40 ? ['מש״ק/ית קישור','Liaison NCO','אינסטינקטים טובים. עוד קצת ניסיון ואתם שם.','Good instincts. A little more practice and you’re there.']
+          : ['בהכשרה','In Training','בדיוק בשביל זה יש קורס. כל תרחיש פה מלמד משהו על התפקיד.',"That’s what the course is for. Every situation here teaches something about the role."];
+    $('final').textContent = p + '/' + max;
+    $('rank').textContent = R[0]; $('rank-en').textContent = R[1]; $('rank-text').textContent = R[2]; $('rank-text-en').textContent = R[3];
+    var ol = $('lessons'); ol.innerHTML = '';
+    SITUATIONS.forEach(function(s, i){
+      var li = document.createElement('li');
+      var m = document.createElement('span'); m.className = 'mark'; m.style.background = st.picks[i] === 10 ? '#1F7A4A' : st.picks[i] === 5 ? '#8A5A12' : '#B3261E'; m.setAttribute('aria-hidden','true');
+      li.appendChild(m); li.appendChild(document.createTextNode(s.lesson.he)); li.appendChild(txt('span','en', s.lesson.en)); ol.appendChild(li);
+    });
+    show('s-end'); buzz(p >= 55 ? [40,60,40,60,120] : 40);
+    SND.file('win', 0.85);
+  }
+  $('start').addEventListener('click', function(){ start(); SND.tap(); });
+  $('again').addEventListener('click', start);
+})();
+</script>
+</body>
+</html>

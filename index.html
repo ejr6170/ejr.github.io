@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="he">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#D6E8EE">
+<title>Kishrei Chutz Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: a fixed 1920x1080 booth "stage" (map + glass cards) scaled to fit any screen, letterboxed in ocean blue. Single deliberate light look. */
+:root{
+  color-scheme: light;
+  --ocean:#D6E8EE;
+  --ink:#1F1A10;
+  --ink-2:#3F3420;
+  --ink-3:#4A3D26;
+  --blue:#0038B8;
+  --blue-deep:#001A5E;
+  --glass:rgba(255,251,240,.5);
+  --glass-strong:rgba(255,251,240,.86);
+  --glass-edge:rgba(255,255,255,.75);
+  --shadow:0 10px 30px rgba(20,35,60,.18);
+  --scrim:rgba(10,22,45,.48);
+  --he:'Heebo', 'Arial Hebrew', 'Noto Sans Hebrew', Arial, sans-serif;
+  --en:'Libre Baskerville', Georgia, 'Times New Roman', serif;
+}
+html,body{height:100%}
+body{margin:0;background:var(--ocean);color:var(--ink);font-family:var(--he);overflow:hidden}
+#viewport{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--ocean)}
+#stage > img.map{position:absolute;inset:0;width:1920px;height:1080px;max-width:none;user-select:none;-webkit-user-drag:none}
+svg.layer{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.en{font-family:var(--en);font-style:italic;color:var(--ink-3);direction:ltr;text-align:right}
+button{font:inherit;color:inherit}
+.glass{background:var(--glass);backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);border:1px solid var(--glass-edge);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.7)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* strings */
+.string{fill:none;stroke:var(--blue);stroke-width:2.6;stroke-linecap:round;transition:opacity .4s ease,stroke-width .3s ease}
+.string-shadow{fill:none;stroke:#000;stroke-opacity:.16;stroke-width:2.6;stroke-linecap:round}
+#stage.focus .string{opacity:.22}
+#stage.focus .string.on{opacity:1;stroke-width:4.2;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw .9s cubic-bezier(.3,.7,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.label-he{font-family:var(--he);font-size:16px;font-weight:700;fill:var(--ink);stroke:#FFFDF6;stroke-width:4;stroke-linejoin:round;paint-order:stroke}
+.label-en{font-family:var(--en);font-style:italic;font-size:11px;fill:#5A4A2E;stroke:#FFFDF6;stroke-width:3;stroke-linejoin:round;paint-order:stroke}
+.leader{fill:none;stroke:#5A4A2E;stroke-width:1.2;stroke-opacity:.85;stroke-dasharray:3 2}
+.flag-frame{fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.8}
+
+/* pin hit targets */
+.pin{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border:0;padding:0;background:transparent;border-radius:50%;cursor:pointer;display:grid;place-items:center}
+.pin::before{content:"";width:15px;height:15px;border-radius:50%;background:var(--blue);border:1.5px solid var(--blue-deep);box-shadow:2px 3px 3px rgba(0,0,0,.25), inset -2px -2px 0 rgba(0,0,0,.12)}
+.pin.big::before{width:17px;height:17px}
+.pin::after{content:"";position:absolute;width:15px;height:15px;border-radius:50%;border:2px solid var(--blue);opacity:0;transform:scale(1)}
+.pin:hover::before{transform:scale(1.2)}
+.pin.on::after{animation:ring 1.4s ease-out infinite}
+@keyframes ring{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(3)}}
+.home-pin{position:absolute;left:1135px;top:419px;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#fff;border:3px solid var(--blue);box-sizing:border-box;display:grid;place-items:center;box-shadow:2px 4px 5px rgba(0,0,0,.25);pointer-events:none}
+
+/* chips */
+.chip{position:absolute;display:flex;align-items:center;gap:14px;padding:14px 20px 14px 22px;border-radius:999px;cursor:pointer;direction:rtl;text-align:right;min-height:64px;transition:transform .25s ease,box-shadow .25s ease}
+.chip:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(20,35,60,.26),inset 0 1px 0 rgba(255,255,255,.8)}
+.chip .dot{flex:none;width:40px;height:40px;border-radius:999px;background:var(--blue);display:grid;place-items:center;animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,56,184,.55)}70%{box-shadow:0 0 0 12px rgba(0,56,184,0)}100%{box-shadow:0 0 0 0 rgba(0,56,184,0)}}
+.chip .t{display:flex;flex-direction:column}
+.chip .t b{font-size:20px;font-weight:800;line-height:1.2}
+.chip .t b small{font-size:13px;font-weight:500;color:var(--blue)}
+.chip .t .en{font-size:12px}
+.chip .go{flex:none;margin-right:6px;font-size:12px;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:4px}
+
+/* top-right control panel */
+#panel{position:absolute;right:40px;top:40px;width:300px;border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:14px;direction:rtl}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.toggle-row .lbl{display:flex;flex-direction:column}
+.toggle-row .lbl b{font-size:16px;font-weight:800}
+.toggle-row .lbl .en{font-size:11px}
+.switch{position:relative;flex:none;width:58px;height:34px;border-radius:999px;border:0;background:#B9B2A2;cursor:pointer;transition:background .25s}
+.switch::after{content:"";position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .25s}
+.switch[aria-checked="true"]{background:var(--blue)}
+.switch[aria-checked="true"]::after{transform:translateX(-24px)}
+.status{font-size:12px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:6px;min-height:16px}
+.status .en{font-weight:400;font-size:11px}
+.bar{height:4px;border-radius:4px;background:rgba(60,50,30,.15);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--blue);border-radius:4px}
+.play-link{display:flex;align-items:center;gap:14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.55);border:1px solid rgba(60,50,30,.15);text-decoration:none;color:var(--ink)}
+.play-link:hover{background:rgba(255,255,255,.8)}
+.qr{flex:none;width:96px;height:96px;background:#fff;border-radius:8px;display:grid;place-items:center;overflow:hidden}
+.qr svg{width:88px;height:88px}
+.qr .noqr{font-size:10px;line-height:1.3;color:var(--ink-3);text-align:center;padding:6px}
+.play-link .txt{display:flex;flex-direction:column;gap:2px}
+.play-link .txt b{font-size:17px;font-weight:800;line-height:1.2}
+.play-link .txt .en{font-size:12px}
+.play-link .txt span.cta{font-size:12px;font-weight:700;color:var(--blue)}
+.more{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.more a{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:8px;border-radius:12px;background:var(--blue);color:#fff;text-decoration:none;font-size:15px;font-weight:800;line-height:1.2;text-align:center}
+.more a .en{color:#E6EDFC;font-size:11px;font-weight:400;text-align:center}
+.more a:hover{background:var(--blue-deep)}
+.showbtn{display:flex;align-items:center;justify-content:center;gap:12px;min-height:56px;border:0;border-radius:12px;background:#D4AF4A;color:#13294B;cursor:pointer;box-shadow:0 3px 0 #9C7F2E}
+.showbtn .lbl{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+.showbtn b{font-size:16px;font-weight:800}
+.showbtn .en{color:#13294B;font-size:11px}
+.showbtn[aria-pressed="true"]{background:#13294B;color:#fff;box-shadow:none}
+.showbtn[aria-pressed="true"] .en{color:#C9D3E6}
+#viewport{transition:opacity .6s ease}
+body.fadeout #viewport{opacity:0}
+body.fadein #viewport{animation:fin .8s ease}
+@keyframes fin{from{opacity:0}to{opacity:1}}
+.fs{align-self:flex-start;border:1px solid rgba(60,50,30,.2);background:rgba(255,255,255,.55);border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;min-height:36px}
+
+/* title card */
+#title{position:absolute;left:40px;bottom:40px;width:560px;box-sizing:border-box;padding:24px 30px;border-radius:14px;display:flex;gap:22px;align-items:center;direction:rtl}
+#title h1{margin:0;font-size:38px;font-weight:800;line-height:1.1;text-wrap:balance}
+#title .sub{margin:8px 0 0;font-size:18px;font-weight:500;color:var(--ink-2)}
+
+/* scrim + popovers */
+#scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .4s ease}
+#scrim.on{opacity:1;pointer-events:auto}
+.pop{position:absolute;width:400px;box-sizing:border-box;padding:20px 22px 18px;border-radius:18px;background:var(--glass-strong);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border:1px solid rgba(255,255,255,.85);box-shadow:0 24px 60px rgba(10,22,45,.3),inset 0 1px 0 rgba(255,255,255,.8);direction:rtl;display:flex;flex-direction:column;gap:10px;opacity:0;transform:scale(.6);pointer-events:none;transition:transform .45s cubic-bezier(.2,.9,.25,1.12),opacity .3s ease}
+.pop.on{opacity:1;transform:scale(1);pointer-events:auto}
+.pop .head{display:flex;align-items:center;gap:14px}
+.pop .head img{width:72px;height:54px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.2);flex:none;max-width:none}
+.pop .head .nm{display:flex;flex-direction:column;flex:1;min-width:0}
+.pop .head .nm b{font-size:28px;font-weight:800;line-height:1.1}
+.pop .head .nm .en{font-size:14px}
+.tag{align-self:flex-start;font-size:12px;font-weight:700;color:#fff;background:var(--blue);padding:4px 10px;border-radius:999px}
+.tag .en{color:#E6EDFC;font-size:11px;margin-right:4px}
+.pop p{margin:0;font-size:17px;line-height:1.5;color:#2B2416}
+.pop p.en{font-size:13px;line-height:1.45}
+.x{flex:none;width:44px;height:44px;border-radius:999px;border:1px solid rgba(60,50,30,.2);background:rgba(255,255,255,.6);display:grid;place-items:center;cursor:pointer}
+.x:hover{background:rgba(0,56,184,.12)}
+
+/* big cards */
+.card{position:absolute;left:580px;width:760px;box-sizing:border-box;padding:30px 36px 24px;border-radius:20px;background:var(--glass-strong);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid rgba(255,255,255,.8);box-shadow:0 30px 80px rgba(10,22,45,.35),inset 0 1px 0 rgba(255,255,255,.8);display:flex;flex-direction:column;gap:16px;direction:rtl;opacity:0;pointer-events:none;transition:transform .55s cubic-bezier(.2,.9,.25,1.08),opacity .35s ease}
+.card.on{opacity:1;pointer-events:auto;transform:none!important}
+#card-unit{top:230px;transform-origin:top left;transform:translate(-540px,-190px) scale(.18)}
+#card-role{top:200px;transform-origin:bottom right;transform:translate(540px,260px) scale(.18)}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.card .eyebrow{font-size:14px;font-weight:700;letter-spacing:1px;color:var(--blue)}
+.card .eyebrow .en{display:block;letter-spacing:0;font-weight:400;font-size:13px}
+.card h2{margin:0;font-size:46px;font-weight:800;line-height:1.08;text-wrap:balance}
+.card .divider{border-top:1px solid rgba(60,50,30,.22);padding-top:16px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.stat .n{font-family:var(--en);font-size:34px;font-weight:700;color:var(--blue);line-height:1.1}
+.stat .n.he{font-family:var(--he);font-weight:800}
+.stat .d{font-size:14px;line-height:1.35;color:#2B2416}
+.stat .en{font-size:11.5px;line-height:1.35}
+.strip{background:rgba(0,56,184,.9);color:#fff;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:3px}
+.strip b{font-size:17px;line-height:1.4}
+.strip .en{color:#E6EDFC;font-size:13px}
+.src{font-size:12px;color:var(--ink-3)}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}
+.cols h3{margin:0 0 8px;font-size:15px;font-weight:700;color:var(--ink-2)}
+.cols h3 .en{display:block;font-weight:400;font-size:12px;margin-top:1px}
+.cols ul{margin:0;padding:0 20px 0 0;display:flex;flex-direction:column;gap:10px;font-size:16.5px;line-height:1.4;color:#2B2416}
+.cols li .en{display:block;font-size:12.5px;line-height:1.4}
+.quotes{display:flex;flex-direction:column;gap:10px}
+.quote{border-right:3px solid var(--blue);padding:4px 14px 4px 0}
+.quote q{font-size:17px;line-height:1.45;quotes:"״" "״"}
+.quote .who{font-size:12px;color:var(--ink-3);margin-top:4px}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div id="viewport">
+<div id="stage">
+  <img class="map" src="map.svg" alt="" aria-hidden="true">
+  <svg id="lines" class="layer" width="1920" height="1080" viewBox="0 0 1920 1080" aria-hidden="true"></svg>
+  <svg id="marks" class="layer" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="Map of Israel's partner militaries, connected to Israel by strings"></svg>
+  <div class="home-pin" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0038B8" stroke-width="2" stroke-linejoin="round"><path d="M12 2.5 20.2 16.75H3.8Z"/><path d="M12 21.5 3.8 7.25H20.2Z"/></svg>
+  </div>
+  <div id="pins"></div>
+
+  <div id="title" class="glass">
+    <svg width="84" height="61" viewBox="0 0 220 160" role="img" aria-label="Flag of Israel" style="flex:none;border:1px solid rgba(60,50,30,.25);border-radius:3px">
+      <rect width="220" height="160" fill="#fff"/><rect y="15" width="220" height="25" fill="#0038B8"/><rect y="120" width="220" height="25" fill="#0038B8"/>
+      <g fill="none" stroke="#0038B8" stroke-width="5.5"><path d="M110 52 L137 99 L83 99 Z"/><path d="M110 108 L83 61 L137 61 Z"/></g>
+    </svg>
+    <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+      <h1>ישראל וצבאות שותפים</h1>
+      <div class="en" style="font-size:16px">Israel &amp; Partner Militaries</div>
+      <p class="sub">שותפויות ביטחוניות ברחבי העולם</p>
+      <div class="en" style="font-size:13px">Defense partnerships around the world</div>
+    </div>
+  </div>
+
+  <button type="button" class="chip glass" id="chip-unit" style="left:40px;top:40px" aria-label="קשרי חוץ, פתיחת פרטים · Kishrei Chutz, open details">
+    <span class="dot"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg></span>
+    <span class="t"><b>קשרי חוץ <small>· היחידה</small></b><span class="en">Kishrei Chutz · The Unit</span></span>
+    <span class="go">לחצו <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0038B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span>
+  </button>
+
+  <button type="button" class="chip glass" id="chip-role" style="right:40px;bottom:40px" aria-label="התפקיד, פתיחת פרטים · The Role, open details">
+    <span class="dot"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/></svg></span>
+    <span class="t"><b>מש״ק/ית קישור <small>· התפקיד</small></b><span class="en">Liaison NCO · The Role</span></span>
+    <span class="go">לחצו <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0038B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span>
+  </button>
+
+  <div id="panel" class="glass">
+    <div class="toggle-row">
+      <div class="lbl"><b>סיור אוטומטי</b><span class="en">Autoplay tour</span></div>
+      <button type="button" id="auto" class="switch" role="switch" aria-checked="true" aria-label="סיור אוטומטי · Autoplay"></button>
+    </div>
+    <div>
+      <div class="status" id="status"></div>
+      <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+    </div>
+    <a class="play-link" id="play" href="game.html">
+      <div class="qr" id="qr" aria-hidden="true"></div>
+      <div class="txt">
+        <b>נחשו את הדגל</b>
+        <span class="en">Guess the Flag</span>
+        <span class="cta">סרקו ושחקו בטלפון</span>
+        <span class="en" style="font-size:11px">Scan to play on your phone</span>
+      </div>
+    </a>
+    <div class="more">
+      <a href="day.html">יום בתפקיד<span class="en">A day in the role</span></a>
+      <a href="liaison.html">את/ה הקישור<span class="en">You're the liaison</span></a>
+    </div>
+    <button type="button" class="showbtn" id="show" aria-pressed="false">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M10 8.5v5l4-2.5z"/><path d="M8 21h8"/></svg>
+      <span class="lbl"><b id="show-he">מצגת לדוכן</b><span class="en" id="show-en">Booth slideshow</span></span>
+    </button>
+    <button type="button" class="fs" id="fs">מסך מלא · <span class="en" style="font-size:11px">Full screen</span></button>
+  </div>
+
+  <div id="scrim"></div>
+
+  <div id="pop" class="pop" role="dialog" aria-live="polite" aria-label="">
+    <div class="head">
+      <img id="pop-flag" alt="">
+      <div class="nm"><b id="pop-he"></b><span class="en" id="pop-en"></span></div>
+      <button type="button" class="x" data-close aria-label="סגירה · Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1A10" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <span class="tag"><span id="pop-tag-he"></span><span class="en" id="pop-tag-en"></span></span>
+    <p id="pop-fact-he"></p>
+    <p class="en" id="pop-fact-en"></p>
+  </div>
+
+  <div id="card-unit" class="card" role="dialog" aria-label="קשרי חוץ · Kishrei Chutz">
+    <div class="top">
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div class="eyebrow">היחידה <span class="en">The Unit</span></div>
+        <h2>קשרי חוץ</h2>
+        <div style="font-size:18px;font-weight:500;color:var(--ink-2)">חטיבת קשרי החוץ של צה״ל</div>
+        <div class="en" style="font-size:14px">Kishrei Chutz · IDF Foreign Relations Division</div>
+      </div>
+      <button type="button" class="x" data-close aria-label="סגירה · Close" style="width:48px;height:48px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1A10" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <p style="margin:0;font-size:17px;line-height:1.5;color:#2B2416">הגשר של צה״ל לצבאות העולם: קשרים עם צבאות שותפים בחו״ל, קישור עם צבאות שכנים ותיאום עם כוחות בינלאומיים באזור.</p>
+      <p class="en" style="margin:0;font-size:13px;line-height:1.45">The IDF's bridge to the world's militaries: ties with partner armies abroad, liaison with neighboring armies, and coordination with international forces in the region.</p>
+    </div>
+    <div class="stats divider">
+      <div class="stat"><div class="n">1948</div><div class="d">רשת הנספחים הצבאיים נוסדה עם קום המדינה</div><div class="en">IDF attaché network founded with the state</div></div>
+      <div class="stat"><div class="n">19</div><div class="d">מדינות שלחו קצינים לביקור תדריך אחד בצה״ל (2025)</div><div class="en">nations sent officers to a single IDF briefing visit (2025)</div></div>
+      <div class="stat"><div class="n he">3 שנים</div><div class="d">משך שיבוץ טיפוסי של נספח צה״ל בחו״ל</div><div class="en">typical posting for an IDF attaché abroad</div></div>
+      <div class="stat"><div class="n">17</div><div class="d">מדינות שותפות על המפה הזו</div><div class="en">partner nations on this map</div></div>
+    </div>
+    <div class="strip"><b>חיילים בודדים משרתים ביחידה כאנשי קישור לכוחות זרים.</b><span class="en">Lone soldiers serve in the unit as liaison officers to foreign forces.</span></div>
+    <div class="src">מקורות: <span dir="ltr">Israel Hayom (2019), Jerusalem Post (2025), DraftIDF</span></div>
+  </div>
+
+  <div id="card-role" class="card" role="dialog" aria-label="מש״ק/ית קישור לכוחות הזרים · Liaison NCO to Foreign Forces">
+    <div class="top">
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div class="eyebrow">התפקיד <span class="en">The Role</span></div>
+        <h2 style="font-size:40px">מש״ק/ית קישור לכוחות הזרים</h2>
+        <div class="en" style="font-size:16px">Liaison NCO to Foreign Forces</div>
+      </div>
+      <button type="button" class="x" data-close aria-label="סגירה · Close" style="width:48px;height:48px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1A10" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="cols divider">
+      <div>
+        <h3>מה עושים בתפקיד <span class="en">What you do</span></h3>
+        <ul>
+          <li>עבודה עם צבאות זרים וכוחות שמירת שלום לטיפוח יחסים בינלאומיים<span class="en">Work with foreign armies and peacekeeping forces to build international relations</span></li>
+          <li>תיאום אימונים משותפים וניסויים צבאיים בארץ ובחו״ל<span class="en">Coordinate joint training exercises and military trials in Israel and abroad</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>מה עוזר <span class="en">What helps</span></h3>
+        <ul>
+          <li>אנגלית ברמה גבוהה, ושפות נוספות הן יתרון אמיתי<span class="en">Strong English; other languages are a real advantage</span></li>
+          <li>חיילים בודדים מביאים איתם בדיוק את זה: שפה ותרבות מהבית<span class="en">Lone soldiers bring exactly that: language and culture from home</span></li>
+        </ul>
+      </div>
+    </div>
+    <div id="day" class="divider" hidden>
+      <div class="cols" style="grid-template-columns:1fr">
+        <div><h3>יום בתפקיד <span class="en">A day in the role</span></h3><ul id="day-list"></ul></div>
+      </div>
+    </div>
+    <div id="quotes-wrap" class="divider" hidden>
+      <div class="cols" style="grid-template-columns:1fr"><div><h3>מהשטח <span class="en">From the field</span></h3><div class="quotes" id="quotes"></div></div></div>
+    </div>
+    <div class="src">מקור: מדריך התפקידים של צה״ל <span class="en">(IDF Jobs guide)</span></div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/* ===== Edit these when you have them ===== */
+var CONFIG = {
+  // Public link to the game once the site is hosted, e.g. "https://kishrei-chutz.netlify.app/game.html".
+  // Leave empty to use the game page next to this one.
+  gameUrl: "",
+  // A day in the role (from your interview). Each item: { he: "...", en: "..." }. Empty = section hidden.
+  dayInRole: [],
+  // Quotes from someone who served. Each: { he: "...", en: "...", who: "Name, role, years" }. Empty = section hidden.
+  quotes: [],
+  autoplaySecondsPerCountry: 5,
+  autoplaySecondsPerCard: 10,
+  resumeAfterIdleSeconds: 30
+};
+var COUNTRIES = [{"id":"us","he":"ארצות הברית","en":"United States","pin":[587,375],"ctrl":[861,276],"label":[587,403,"middle"],"flag":[486,388],"big":true,"tag_he":"ברית אסטרטגית","tag_en":"Strategic ally","fact_he":"בעלת הברית הקרובה ביותר של ישראל: סיוע ביטחוני רב-שנתי ותרגילים משותפים כמו ״ג׳וניפר קוברה״.","fact_en":"Israel's closest ally: multi-year security aid and joint exercises such as Juniper Cobra."},{"id":"gb","he":"בריטניה","en":"United Kingdom","pin":[960,300],"ctrl":[1048,313],"label":[888,277,"start"],"flag":[850,262],"leader":[912,278],"tag_he":"אימונים משותפים","tag_en":"Joint training","fact_he":"חיל האוויר המלכותי השתתף בתרגיל ״דגל כחול״ בישראל ב-2021.","fact_en":"The Royal Air Force flew in Israel's Blue Flag air exercise in 2021."},{"id":"fr","he":"צרפת","en":"France","pin":[971,316],"ctrl":[1053,325],"label":[868,333,"start"],"flag":[830,318],"leader":[936,328],"tag_he":"אימונים משותפים","tag_en":"Joint training","fact_he":"חיל האוויר הצרפתי השתתף בתרגיל ״דגל כחול״ בישראל ב-2021.","fact_en":"The French Air Force flew in Israel's Blue Flag exercise in 2021."},{"id":"de","he":"גרמניה","en":"Germany","pin":[1020,295],"ctrl":[1078,320],"label":[938,205,"start"],"flag":[900,190],"leader":[932,212],"tag_he":"רכש ופיתוח","tag_en":"Procurement","fact_he":"גרמניה רכשה את מערכת ההגנה ״חץ 3״, ובונה את צוללות חיל הים של ישראל.","fact_en":"Germany bought the Arrow 3 missile-defense system and builds the Israeli Navy's submarines."},{"id":"pl","he":"פולין","en":"Poland","pin":[1055,296],"ctrl":[1095,325],"label":[1138,283,"start"],"flag":[1100,268],"leader":[1100,280],"tag_he":"אימונים משותפים","tag_en":"Joint training","fact_he":"מטוסי F-16 של חיל האוויר הפולני השתתפו בתרגיל ״דגל כחול״ ב-2017.","fact_en":"Polish Air Force F-16s took part in Blue Flag 2017 in Israel."},{"id":"cz","he":"צ׳כיה","en":"Czechia","pin":[1026,308],"ctrl":[1081,329],"label":[1128,333,"start"],"flag":[1090,318],"leader":[1090,326],"tag_he":"רכש ופיתוח","tag_en":"Procurement","fact_he":"צבא צ׳כיה רכש את מערכת ההגנה האווירית הישראלית SPYDER.","fact_en":"The Czech Army bought Israel's SPYDER air-defense system."},{"id":"it","he":"איטליה","en":"Italy","pin":[1020,357],"ctrl":[1078,359],"label":[1008,371,"end"],"flag":[922,360],"tag_he":"אימונים משותפים","tag_en":"Joint training","fact_he":"טייסי חיל האוויר מתאמנים על מטוס M-346 האיטלקי (״לביא״), ואיטליה השתתפה ב״דגל כחול״.","fact_en":"Israeli pilots train on Italy's M-346 jet (the 'Lavi'), and Italy flies in Blue Flag."},{"id":"gr","he":"יוון","en":"Greece","pin":[1075,381],"ctrl":[1105,384],"label":[1062,404,"end"],"flag":[962,389],"tag_he":"אימונים משותפים","tag_en":"Joint training","fact_he":"תרגילים משותפים רבים, ובית ספר לטיסה בינלאומי בקלמטה שהוקם על ידי חברה ישראלית.","fact_en":"Frequent joint drills, and an international flight school at Kalamata built by an Israeli company."},{"id":"cy","he":"קפריסין","en":"Cyprus","pin":[1124,398],"ctrl":[1130,403],"label":[1110,372,"end"],"flag":[1114,357],"tag_he":"אימונים משותפים","tag_en":"Joint training","fact_he":"כוחות צה״ל מקיימים בקפריסין תרגילים משותפים גדולים.","fact_en":"IDF forces hold large joint training exercises in Cyprus."},{"id":"fi","he":"פינלנד","en":"Finland","pin":[1067,251],"ctrl":[1101,295],"label":[1067,226,"middle"],"flag":[994,210],"tag_he":"רכש ופיתוח","tag_en":"Procurement","fact_he":"פינלנד רכשה ב-2023 את מערכת ההגנה ״קלע דוד״.","fact_en":"Finland bought the David's Sling air-defense system in 2023."},{"id":"az","he":"אזרבייג׳ן","en":"Azerbaijan","pin":[1200,366],"ctrl":[1168,374],"label":[1213,360,"start"],"flag":[1284,345],"tag_he":"רכש ופיתוח","tag_en":"Procurement","fact_he":"אזרבייג׳ן היא אחת הרוכשות הגדולות של מערכות ביטחון ישראליות.","fact_en":"Azerbaijan is one of the largest buyers of Israeli defense systems."},{"id":"in","he":"הודו","en":"India","pin":[1348,438],"ctrl":[1242,381],"label":[1362,444,"start"],"flag":[1404,429],"big":true,"tag_he":"רכש ופיתוח","tag_en":"Co-development","fact_he":"שותפה ביטחונית מרכזית: פיתוח משותף של טילי ״ברק 8״ והשתתפות ב״דגל כחול״.","fact_en":"A major defense partner: co-developed the Barak-8 missile and flew in Blue Flag."},{"id":"ae","he":"איחוד האמירויות","en":"UAE","pin":[1236,463],"ctrl":[1186,417],"label":[1250,481,"start"],"flag":[1374,466],"tag_he":"הסכמי אברהם","tag_en":"Abraham Accords","fact_he":"הסכמי אברהם (2020) פתחו פרק חדש של שיתוף פעולה ביטחוני.","fact_en":"The 2020 Abraham Accords opened a new chapter of defense cooperation."},{"id":"bh","he":"בחריין","en":"Bahrain","pin":[1216,453],"ctrl":[1176,417],"label":[1228,447,"start"],"flag":[1282,432],"tag_he":"הסכמי אברהם","tag_en":"Abraham Accords","fact_he":"ב-2022 חתמה בחריין עם ישראל על מזכר הבנות ביטחוני.","fact_en":"In 2022 Bahrain signed a security memorandum of understanding with Israel."},{"id":"ma","he":"מרוקו","en":"Morocco","pin":[926,405],"ctrl":[1031,366],"label":[912,411,"end"],"flag":[832,396],"tag_he":"הסכמי אברהם","tag_en":"Abraham Accords","fact_he":"ב-2021 חתמה מרוקו עם ישראל על הסכם שיתוף פעולה ביטחוני, הראשון מסוגו.","fact_en":"In 2021 Morocco signed its first-ever defense cooperation agreement with Israel."},{"id":"ph","he":"הפיליפינים","en":"Philippines","pin":[1587,523],"ctrl":[1361,369],"label":[1601,528,"start"],"flag":[1698,513],"big":true,"tag_he":"רכש ופיתוח","tag_en":"Procurement","fact_he":"חיל האוויר הפיליפיני מפעיל מערכות הגנה אווירית ישראליות מסוג SPYDER.","fact_en":"The Philippine Air Force operates Israeli SPYDER air-defense systems."},{"id":"sg","he":"סינגפור","en":"Singapore","pin":[1503,603],"ctrl":[1319,420],"label":[1517,609,"start"],"flag":[1590,594],"big":true,"tag_he":"קשר ותיק","tag_en":"Long-standing ties","fact_he":"יועצים ישראלים סייעו בהקמת צבא סינגפור בשנות ה-60.","fact_en":"Israeli advisers helped build Singapore's armed forces in the 1960s."}];
+var FLAGS = {"us":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLXVzIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2JkM2Q0NCIgZD0iTTAgMGg2NDB2NDgwSDAiLz4KICA8cGF0aCBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMzciIGQ9Ik0wIDU1LjNoNjQwTTAgMTI5aDY0ME0wIDIwM2g2NDBNMCAyNzdoNjQwTTAgMzUxaDY0ME0wIDQyNWg2NDAiLz4KICA8cGF0aCBmaWxsPSIjMTkyZjVkIiBkPSJNMCAwaDM2NC44djI1OC41SDAiLz4KICA8bWFya2VyIGlkPSJ1cy1hIiBtYXJrZXJIZWlnaHQ9IjMwIiBtYXJrZXJXaWR0aD0iMzAiPgogICAgPHBhdGggZmlsbD0iI2ZmZiIgZD0ibTE0IDAgOSAyN0wwIDEwaDI4TDUgMjd6Ii8+CiAgPC9tYXJrZXI+CiAgPHBhdGggZmlsbD0ibm9uZSIgbWFya2VyLW1pZD0idXJsKCN1cy1hKSIgZD0ibTAgMCAxNiAxMWg2MSA2MSA2MSA2MSA2MEw0NyAzN2g2MSA2MSA2MCA2MUwxNiA2M2g2MSA2MSA2MSA2MSA2MEw0NyA4OWg2MSA2MSA2MCA2MUwxNiAxMTVoNjEgNjEgNjEgNjEgNjBMNDcgMTQxaDYxIDYxIDYwIDYxTDE2IDE2Nmg2MSA2MSA2MSA2MSA2MEw0NyAxOTJoNjEgNjEgNjAgNjFMMTYgMjE4aDYxIDYxIDYxIDYxIDYweiIvPgo8L3N2Zz4K","gb":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWdiIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iIzAxMjE2OSIgZD0iTTAgMGg2NDB2NDgwSDB6Ii8+CiAgPHBhdGggZmlsbD0iI0ZGRiIgZD0ibTc1IDAgMjQ0IDE4MUw1NjIgMGg3OHY2Mkw0MDAgMjQxbDI0MCAxNzh2NjFoLTgwTDMyMCAzMDEgODEgNDgwSDB2LTYwbDIzOS0xNzhMMCA2NFYweiIvPgogIDxwYXRoIGZpbGw9IiNDODEwMkUiIGQ9Im00MjQgMjgxIDIxNiAxNTl2NDBMMzY5IDI4MXptLTE4NCAyMCA2IDM1TDU0IDQ4MEgwek02NDAgMHYzTDM5MSAxOTFsMi00NEw1OTAgMHpNMCAwbDIzOSAxNzZoLTYwTDAgNDJ6Ii8+CiAgPHBhdGggZmlsbD0iI0ZGRiIgZD0iTTI0MSAwdjQ4MGgxNjBWMHpNMCAxNjB2MTYwaDY0MFYxNjB6Ii8+CiAgPHBhdGggZmlsbD0iI0M4MTAyRSIgZD0iTTAgMTkzdjk2aDY0MHYtOTZ6TTI3MyAwdjQ4MGg5NlYweiIvPgo8L3N2Zz4K","fr":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWZyIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMGg2NDB2NDgwSDB6Ii8+CiAgPHBhdGggZmlsbD0iIzAwMDA5MSIgZD0iTTAgMGgyMTMuM3Y0ODBIMHoiLz4KICA8cGF0aCBmaWxsPSIjZTEwMDBmIiBkPSJNNDI2LjcgMEg2NDB2NDgwSDQyNi43eiIvPgo8L3N2Zz4K","de":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWRlIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2ZjMCIgZD0iTTAgMzIwaDY0MHYxNjBIMHoiLz4KICA8cGF0aCBmaWxsPSIjMDAwMDAxIiBkPSJNMCAwaDY0MHYxNjBIMHoiLz4KICA8cGF0aCBmaWxsPSJyZWQiIGQ9Ik0wIDE2MGg2NDB2MTYwSDB6Ii8+Cjwvc3ZnPgo=","pl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLXBsIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPGcgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik02NDAgNDgwSDBWMGg2NDB6Ii8+CiAgICA8cGF0aCBmaWxsPSIjZGMxNDNjIiBkPSJNNjQwIDQ4MEgwVjI0MGg2NDB6Ii8+CiAgPC9nPgo8L3N2Zz4K","cz":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWN6IiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMGg2NDB2MjQwSDB6Ii8+CiAgPHBhdGggZmlsbD0iI2Q3MTQxYSIgZD0iTTAgMjQwaDY0MHYyNDBIMHoiLz4KICA8cGF0aCBmaWxsPSIjMTE0NTdlIiBkPSJNMzYwIDI0MCAwIDB2NDgweiIvPgo8L3N2Zz4K","it":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWl0IiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPGcgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2Utd2lkdGg9IjFwdCI+CiAgICA8cGF0aCBmaWxsPSIjZmZmIiBkPSJNMCAwaDY0MHY0ODBIMHoiLz4KICAgIDxwYXRoIGZpbGw9IiMwMDkyNDYiIGQ9Ik0wIDBoMjEzLjN2NDgwSDB6Ii8+CiAgICA8cGF0aCBmaWxsPSIjY2UyYjM3IiBkPSJNNDI2LjcgMEg2NDB2NDgwSDQyNi43eiIvPgogIDwvZz4KPC9zdmc+Cg==","gr":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWdyIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iIzBkNWVhZiIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCAwaDY0MHY1My4zSDB6Ii8+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCA1My4zaDY0MHY1My40SDB6Ii8+CiAgPHBhdGggZmlsbD0iIzBkNWVhZiIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCAxMDYuN2g2NDBWMTYwSDB6Ii8+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCAxNjBoNjQwdjUzLjNIMHoiLz4KICA8cGF0aCBmaWxsPSIjMGQ1ZWFmIiBkPSJNMCAwaDI2Ni43djI2Ni43SDB6Ii8+CiAgPHBhdGggZmlsbD0iIzBkNWVhZiIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCAyMTMuM2g2NDB2NTMuNEgweiIvPgogIDxwYXRoIGZpbGw9IiNmZmYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTAgMjY2LjdoNjQwVjMyMEgweiIvPgogIDxwYXRoIGZpbGw9IiMwZDVlYWYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTAgMzIwaDY0MHY1My4zSDB6Ii8+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCAzNzMuM2g2NDB2NTMuNEgweiIvPgogIDxnIGZpbGw9IiNmZmYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLXdpZHRoPSIxLjMiPgogICAgPHBhdGggZD0iTTEwNi43IDBIMTYwdjI2Ni43aC01My4zeiIvPgogICAgPHBhdGggZD0iTTAgMTA2LjdoMjY2LjdWMTYwSDB6Ii8+CiAgPC9nPgogIDxwYXRoIGZpbGw9IiMwZDVlYWYiIGQ9Ik0wIDQyNi43aDY0MFY0ODBIMHoiLz4KPC9zdmc+Cg==","cy":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBpZD0iZmxhZy1pY29ucy1jeSIgdmlld0JveD0iMCAwIDY0MCA0ODAiPgogIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0wIDBoNjQwdjQ4MEgweiIvPgogIDxwYXRoIGlkPSJjeS1hIiBmaWxsPSIjNDM1MTI1IiBkPSJNMzA3LjggMzk4LjZhLjguOCAwIDAgMS0uMi0uMmgtLjFsLTEuMy0xLjQtMy44LTQuNS00LjktNi4zLS42LS45LTYuMi0xLjktNC42LTIuMSAyLjQtMi43IDguNCAzLjUgNi4yIDEuMyAxMS41IDguNS0zLjMgMi45YTM3LjIgMzcuMiAwIDAgMC0zLjMgMy41bC43LS41LjguNnptLTQyLjYtMTIuOGEzMS43IDMxLjcgMCAwIDEtMTYtNC41cy43LTEuMyAyLjMtMi40YzEuNi0xLjIgNC40LTIuNSA5LTIuNiA1LjQgMCAxMiAxLjkgMTkuNSA1LjRhMjguOCAyOC44IDAgMCAxLTE0LjggNHptLTIzLjUtNS4yYy0xIDAtMi0uNC0yLjYtMWE1LjIgNS4yIDAgMCAxLTEuMS0yLjQgMTEuNyAxMS43IDAgMCAxLS4zLTMuNCAzLjUgMy41IDAgMCAxIDEuMy0uMmMyIDAgMy42IDEuNyA0LjMgMy40LjQgMSAuNSAxLjguMiAyLjUtLjIuNi0xIDEtMS44IDF6bTQxLjMtNC44Yy0xMy45LTItMTkuOC03LTIyLjMtMTAuOS0yLjYtNC4xLTItOC0yLThzLjgtLjIgMi0uMmMzLjggMCAxMy4yIDEuOSAyMi4zIDE5em0tMjguNS0yLjhjLTUuOSAwLTEwLjQtMS0xMy40LTNhOC4zIDguMyAwIDAgMS0zLTMuMyA1LjQgNS40IDAgMCAxLS40LTEuNiAxOC4yIDE4LjIgMCAwIDEgNy4yLTEuNCAyNyAyNyAwIDAgMSAxOC45IDguN2MtMy40LjQtNi41LjYtOS4zLjZtLTI4LjctMWMtNi4yIDAtMTQuOC0yLTIwLjItNy4zIDAgMCA1LjktMS41IDEyLjQtMS43aDEuMmM1LjkgMCAxMC40IDEuMSAxMy40IDMuNCAxIC44IDEuNiAxLjUgMS43IDIuMi4xLjYtLjIgMS4yLS44IDEuNy0xLjQgMS0zLjggMS42LTcuMiAxLjZoLS41em0tMjAuMy0xMC41YTIuNiAyLjYgMCAwIDEtMi0xIDQuNyA0LjcgMCAwIDEtLjgtMmMtLjMtMS40LS4yLTIuOC0uMi0yLjlhMi40IDIuNCAwIDAgMSAxLS4yYy45IDAgMS42LjUgMiAxYTUuNiA1LjYgMCAwIDEgMS40IDJjLjIuOS4zIDEuNiAwIDIuMiAwIC40LS42IDEtMS4zIDF6bTQ2LjktMWMtMSAwLTItLjQtMi42LTFhNS4yIDUuMiAwIDAgMS0xLjEtMi40IDExLjcgMTEuNyAwIDAgMS0uMy0zLjQgMy41IDMuNSAwIDAgMSAxLjMtLjJjMiAwIDMuNyAxLjcgNC4zIDMuNC40IDEgLjUgMS44LjMgMi41LS4zLjYtMSAxLTIgMXptLTIyLjgtMWMtMTIuNi0uNC0xOS4yLTQtMjIuNC03YTE0LjYgMTQuNiAwIDAgMS0zLjQtNC4zYy0uNS0xLS43LTEuOC0uNy0yczEuMi0uNCAzLS40aC40YzQuMiAwIDEyLjkgMS44IDIzIDEzLjd6bTEzLjYtMS4yYTMwLjggMzAuOCAwIDAgMS0xOC45LTkuMyAxOS40IDE5LjQgMCAwIDEtNC4xLTdzMS4yLS4zIDMtLjRhMTQuMiAxNC4yIDAgMCAxIDEgMGM1IC4xIDE0LjMgMi40IDE5IDE2LjdtLTUyLTVhNDIgNDIgMCAwIDEtOS41LTFjLTUuMy0xLjQtNy42LTMuNC04LjYtNC45YTUgNSAwIDAgMS0uOC0yIDMuNCAzLjQgMCAwIDEgMC0uOHMzLjUtMSA4LjQtMS4xYTM1IDM1IDAgMCAxIDcuNC42IDIxLjcgMjEuNyAwIDAgMSAxMi44IDguMXMtNCAxLjItOS43IDEuMnptMjMuNS04LjRhMy40IDMuNCAwIDAgMS0yLjUtMSA1LjIgNS4yIDAgMCAxLTEuMS0yLjRjLS40LTEuNi0uMy0zLjItLjMtMy40YTMuNSAzLjUgMCAwIDEgMS4yLS4zaC4xYzIgMCAzLjYgMS44IDQuMyAzLjUuNCAxIC40IDEuOC4yIDIuNC0uMy43LTEgMS4xLTEuOSAxLjF6bS0xNy42LTIuNWEzOC42IDM4LjYgMCAwIDEtOS42LTQuMmMtNC40LTIuNy05LjktNy41LTEwLjUtMTVsMS0uMWguM2MxLjMgMCA0IC4zIDcuMyAyLjggNC4yIDMuMiA4IDguOCAxMS41IDE2LjVtMTEuNS0uNGEzMS4yIDMxLjIgMCAwIDEtNy42LTQuOSA0OC41IDQ4LjUgMCAwIDEtMTMuMy0xOC42cy45LS41IDIuMy0uNmEzLjMgMy4zIDAgMCAxIC4yIDBoLjRjMiAwIDQuOS45IDguMSA0LjQgMy44IDQgNy4xIDEwLjYgMTAgMTkuN3ptLTI5LjktLjljLTMuOSAwLTUuMi0yLTUuNi0zYTYgNiAwIDAgMS0uNC0zIDguNSA4LjUgMCAwIDEgMi0uMiA4IDggMCAwIDEgNi41IDNjLjIuNC44IDEuNC4zIDIuMy0uNC42LTEuMyAxLTIuOCAxem0tOC41LTEwLjhhNTEuMSA1MS4xIDAgMCAxLTktLjdjLTMuNC0uNi01LjMtMy41LTYuNC01LjktMS0yLjUtMS40LTUtMS40LTUgMTAuNi4zIDE1LjcgMy40IDE4IDZhOS40IDkuNCAwIDAgMSAyLjYgNS41cy0xLjYuMi0zLjguMnptMTEtMTFhNDIuNyA0Mi43IDAgMCAxLTIuNC0zLjRjLTEuMy0yLTIuNC00LTIuNC01LjYgMC0xLjctLjQtNS0uNi03bC0uNi00LjVjLjMgMCA2LjYgMi40IDYuNiA4LjRzLS42IDEyLS42IDEyem0tOC4yLS42aC0uMmE0My43IDQzLjcgMCAwIDEtMTguMi0xMC44Yy0xLjctMi0yLjgtNS4yLTMuMS05LjQtLjItMyAwLTUuNSAwLTUuOGEzLjMgMy4zIDAgMCAxIDEuMS0uMWMxLjQgMCAzIC42IDUgMmEzOS42IDM5LjYgMCAwIDEgNS4yIDQuNGMzLjIgMy4yIDUuNyA2LjQgNS43IDYuNC4zLjQgMiAzLjcgMy41IDYuOWEyMiAyMiAwIDAgMSAxLjYgNC42Yy4xLjYuMiAxIDAgMS40YS43LjcgMCAwIDEtLjMuNC45LjkgMCAwIDEtLjQgMHoiLz4KICA8dXNlIHhsaW5rOmhyZWY9IiNjeS1hIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB0cmFuc2Zvcm09Im1hdHJpeCgtMSAwIDAgMSA1OTMuNyAwKSIvPgogIDxwYXRoIGZpbGw9IiNkNDc2MDAiIGQ9Im01MTkgNzYuNC0xLjguNy0uOC4zLTIuMi0uMS0yLjIgMS0zLjggMi42LS4xLjEtMS41LjQtMS4zLS42LS43LjQtLjMgMS41LS43IDEuMS0uOS42LTMgLjMtMi41IDEuNC0zLjQtMS0xLjUuNy0zLjMgMy0xLjcuN2gtLjVsLTIuMy0uMS0uOS4zLTEuNCAxLjMtMi42LjItLjkuNi0xLjMgMi42TDQ3NiA5NmwtLjguMS0uOC0uMy0uNy4xLS4zIDEuNy0uNi43LTEuOC42LTEuNCAxLjItMS4zLjZoLTJsLTEuNyAxLTMuMS4yLTEuMyAxLjItLjMuMy0uNi4zLTEgLjYtLjIuMi0xLjItLjItMS40LjUtLjYtLjgtMSAuNS0xLjIuMS0xLjYtLjctMS4zLS42LS45LjItLjMgMS41di4ybC0xIDEuMi0xLjcgMS4xLS4yLjMtMiAyLjYtMy44IDQtMy4yIDEuNi0zLjMgMS0yLjMgMS45LTYgMy05LjcgNC44LTIgLjYtMi44LjQtNSAxLjktNC40IDEuMy0uMy4xLS44LjMtNi4zIDEuOS0yLjktLjQtMS43LjctNC41LS41aC0zLjFsLTIgLjQtMy43IDEuOC02LjMgMy0yIDItMy4yIDEuNi0zLjggMS4ydi0xLjZsLTEuMy40LTEgLjMtMyAuNGgtMS43bC0xLjEtLjNoLS4ybC02LjIgMi4xLTcgLjctMy41IDEuMUgzMzNsLTEuNi41LTMuMi40LTEuMi0uMy0uMi0uMS05LjQuNC00LjMtLjUtMiAuNS0zLjUtMS4yLTUtLjYtMS4yLS4zLTIuNi0uOC0xLjIuNy0xIC4xLTItLjhoLS44bC0xLjguNi0xLS4yLTEtLjgtMi4xLS4zLTEuNC0xLjEtNy41IDEtMi0uNi02LjktMmgtMWwtMS40IDEtMiAuOC0xLjkuNC0yLjQuMS0yLjgtLjctMi44LTEuNC0xLjEtLjMtMi40LjNoLS43bC00LjQtMi4zLTUuNi0zLjUtMy44LTEuOS0xLjUtLjItLjIuNy43IDIuMi4zIDIuM3YybC0uMSAxLjMuMyAxLjEgMS40IDEuNi42IDEuNS40IDQuMnY0LjNsLS43IDYuOC0uMiAxLS44IDMuNi0uNyAzLjMtMi45IDguNy0uNyAxLTIgMS4zLTQuMyAzLTMuMiAxLjgtMSAuNC0yLjYuMkgyMTlsLTItMS4xLTItLjUtMi42LTEuOS0yLjgtLjYtMy4yLTEuOC0uOC0xLTEuNy0uMi0yLjQtLjctLjktLjMtLjYtLjEtMy0uMS0yLjktMS4zLTEuNS0uNGgtMmwtMi4xIDEtMS4xLjQtMS40LS41aC0xbC0xIDEuNy0uMi4zLS44LjRoLTEuN2wtLjguMy0xLjEuNS0xIC40LS41LjJoLS4zbC0uNS4yaC0uNmwtMS4yLS42LS42LS4zLTEtLjItLjUuMy0uMSAxLjktLjUgMS4xLTEuNiAxLjQtMS42IDEuNC0xIDEuNi0zIDYuNy0xLjkgMi43LS41LjctMiAyLjEtMS43IDEuMy0zLjkgMy0zLjcgMS41LTMuMi42aC0xLjZsLTMtLjQtMi42LS44LTMtMS44LTMuMS0yLjYtNC43LTQuNS0uNi0uNC0uMi0uMS0xLjQtMWgtMS4xbC0uNC44LS4zIDEtLjIuOS0uNSA1di4zbC4zIDIuMSAzLjYgNSAxIDIuNi4yLjMuNyAxLjIuNiAxIDEuMyAzLjYtLjkgMiAuNCAxLjQtMSAuOC0uMiAxLjIgMy4xIDQgLjcgMS43LS43IDIuNC0xLjMgMS40LS4zLjMuMiAxIDEuNCAxLjQgMi41IDIuMiAxLjMgMy4yIDEgMSAxLjItLjMuNi41aDFsMSAxIC42LjIgMSAuNS44IDEgLjEgMy4yIDEuNSAzLjh2Mi41bDEgMS41LjIgMS4yLS41IDMuMyAxLjIgMSAxLjItLjIuOC4xIDEuMyAxLjEgMS42IDIuNCAxLjYtLjIgMSAuNCA0LjcgNC4zIDEgLjYuOS40IDEgMSAxLjQtMWguMmwxLjYtLjIuNy41IDEuNC45aDEuN2w0IDEuMiAxLjYuNCAzLjQgMi4xIDEuNS45LjguNyAxLjIgMSAyLjIgMSAyIC40IDEgLjIuOS4zIDQuMiAxLjcgMi4zLjUgMiAuOCAxLjYuNWgxLjJsMS42LTEuM2gxLjVsMS4zLjIgMS4zLS4yIDItMS4yLjMtLjYgMS40LS42IDQuOC0uNiAxLjQuNCAzLjYtMS41IDIuNC42IDItLjcgNC43IDEgMS4yLjkgMS40IDEuNWgxLjdsLS43IDEuMSAyIDIuMiAxLjkgMi43LjEuNCAxLjMgMy45IDEgMS40LjcgMS45djEuMmwtMSAuOS0uMi40di4ybC4yLjUuNC0uMi43LS40IDEtLjIgMS42LjIgMS4xLjEgMS43LS44IDEuMi0uNiAxLjguOGgybC45LjMgMi40IDEuMSAxLjIuMS40LS4zLjMtLjYtLjEtLjgtMS0xLjEtMi0yLjQtLjgtMS4yLS42LTEuNy0uMi0yLjItLjItMS41LjMtMiAuNS0uNy40LTEuNi4xLS40IDEuMi0xLjUgMy0yIDMuMi0yLjggMi41LTEuNyAyLjYtMS4xdi0uM2wuNC4xIDYuNi0yLjMgMy0uNSAyMCAxLjQuNy0uMi43LTEuOS4zLS4zLjMtLjIgMi4yLTEgMS0uMiAyLjguNyAxLjIuMyAxLjktMWgxLjNsMi43LTEuNWgxLjdsLjctLjIgMy4zLTIuNCAzLjEtLjkuOC0uNC4zLS4yIDMuMy0xLjcgMi0xLjYgMS44LTEgMi0uNCA1LS40IDEuMS0xLjcgMi4yLS4zIDEuMy0xLjUgMS41LS42IDEuMS0xLjYgMS0xLjMgMS4yLS43IDQuMS0uMyA0LjguNi43LS40IDEtMy45IDEuMi0uNyAzLTQuNXYtMS42bC4xLTEuNC41LTItLjMtMy40LjQtMy42IDEuOS00LjUgMS43LTEuOCAyLjctMS45IDEuNC0uNiAyLS4zaC4ybC41LS4yaDkuMmwyLjMtLjEgNS43IDFoLjRsMS45LjcgMi4yIDEuNyAyLjQgMi4zLjQuNCAxLjUuNy41LjIgMS4yLS4yIDEuOC0xIDEuNC0xIDEuOC0xdi0uMmwxLjEtMS41LjQtLjcgMy42LTEuNCA0LjItLjIuNS0uM2guMmwxLjEtMS40aDFsMi42IDEgMS43LS40IDEuNC41IDEuMS0uMSAyLS4zIDIuMyAxLjYgMS4zLjIgNC41IDIuNmguNGwuMi4xLjUtLjIuOC0uMmguMWwuMS4xLjYuNy43LjEuOC0xLS4zLS42LS4xLS4yLTEuNy0uMy0xLjQtMi41IDEuNC0xLjUtMi4yLTIuNi0uNC0uNXYtLjFsLS44LTEuMi0zLjgtNS44LTUtNC0xLjctMS4zLS42LS41LTIuNy0yLjctMS45LTIuNS0uMi0uNS0uNC0uOS0xLjEtMi40LTItMS41LTEuNi0xLjgtMy40LTQuNi0uNS0uNy0uOC0uNWgtMS43bC0uMS0uMmgtLjF2LS4xbC44LS44IDEtLjIuMy0uOS0xLjctNC45di0uMmwtLjEtMS41IDEuMy03LjEuMi0uOSAyLjQtNC43IDEuNC0xLjIgMS42LTMuMSAxLjQtMiAxLjMtMS4zLjItLjEgMi4zLTEuNCAyLS4zIDEuOS0uMyAzLjMgMWgzbC43LS4xIDEuNC0uMiAyLjMtLjcgMS4xLS43LjYtLjggMS4yLTQgLjQtMS4zLjctMS40IDQuMy00LjkgMy4yLTMgNy4yLTUuMiAzLjUtMi4xIDEuOC0xLjEgMTYuMS03LjIgNC4yLTQuMiAyLjItMi4yIDMuOC0yLjYgNC41LTEuOSA0LTMgLjgtMS4xIDEtMy41IDEtLjIuNy0xLjcuMy0uNSAzLjEtMi4yLjQtLjIgMTIuMy02LjIgMS44LjMgMS0xLjUgMy41LS42aC43bC45LS41LjctMS4zdi0uM2wuMS0zLjQuOC0uOS40LTIuMi40LS42LjQtLjUgMS0uN3oiLz4KPC9zdmc+Cg==","fi":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWZpIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMGg2NDB2NDgwSDB6Ii8+CiAgPHBhdGggZmlsbD0iIzAwMmY2YyIgZD0iTTAgMTc0LjVoNjQwdjEzMUgweiIvPgogIDxwYXRoIGZpbGw9IiMwMDJmNmMiIGQ9Ik0xNzUuNSAwaDEzMC45djQ4MGgtMTMxeiIvPgo8L3N2Zz4K","az":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWF6IiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iIzNmOWMzNSIgZD0iTS4xIDBoNjQwdjQ4MEguMXoiLz4KICA8cGF0aCBmaWxsPSIjZWQyOTM5IiBkPSJNLjEgMGg2NDB2MzIwSC4xeiIvPgogIDxwYXRoIGZpbGw9IiMwMGI5ZTQiIGQ9Ik0uMSAwaDY0MHYxNjBILjF6Ii8+CiAgPGNpcmNsZSBjeD0iMzA0IiBjeT0iMjQwIiByPSI3MiIgZmlsbD0iI2ZmZiIvPgogIDxjaXJjbGUgY3g9IjMyMCIgY3k9IjI0MCIgcj0iNjAiIGZpbGw9IiNlZDI5MzkiLz4KICA8cGF0aCBmaWxsPSIjZmZmIiBkPSJtMzg0IDIwMCA3LjcgMjEuNSAyMC42LTkuOC05LjggMjAuN0w0MjQgMjQwbC0yMS41IDcuNyA5LjggMjAuNi0yMC42LTkuOEwzODQgMjgwbC03LjctMjEuNS0yMC42IDkuOCA5LjgtMjAuNkwzNDQgMjQwbDIxLjUtNy43LTkuOC0yMC42IDIwLjYgOS44eiIvPgo8L3N2Zz4K","in":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBpZD0iZmxhZy1pY29ucy1pbiIgdmlld0JveD0iMCAwIDY0MCA0ODAiPgogIDxwYXRoIGZpbGw9IiNmOTMiIGQ9Ik0wIDBoNjQwdjE2MEgweiIvPgogIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0wIDE2MGg2NDB2MTYwSDB6Ii8+CiAgPHBhdGggZmlsbD0iIzEyODgwNyIgZD0iTTAgMzIwaDY0MHYxNjBIMHoiLz4KICA8ZyB0cmFuc2Zvcm09Im1hdHJpeCgzLjIgMCAwIDMuMiAzMjAgMjQwKSI+CiAgICA8Y2lyY2xlIHI9IjIwIiBmaWxsPSIjMDA4Ii8+CiAgICA8Y2lyY2xlIHI9IjE3LjUiIGZpbGw9IiNmZmYiLz4KICAgIDxjaXJjbGUgcj0iMy41IiBmaWxsPSIjMDA4Ii8+CiAgICA8ZyBpZD0iaW4tZCI+CiAgICAgIDxnIGlkPSJpbi1jIj4KICAgICAgICA8ZyBpZD0iaW4tYiI+CiAgICAgICAgICA8ZyBpZD0iaW4tYSIgZmlsbD0iIzAwOCI+CiAgICAgICAgICAgIDxjaXJjbGUgcj0iLjkiIHRyYW5zZm9ybT0icm90YXRlKDcuNSAtOC44IDEzMy41KSIvPgogICAgICAgICAgICA8cGF0aCBkPSJNMCAxNy41LjYgNyAwIDJsLS42IDV6Ii8+CiAgICAgICAgICA8L2c+CiAgICAgICAgICA8dXNlIHhsaW5rOmhyZWY9IiNpbi1hIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB0cmFuc2Zvcm09InJvdGF0ZSgxNSkiLz4KICAgICAgICA8L2c+CiAgICAgICAgPHVzZSB4bGluazpocmVmPSIjaW4tYiIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdHJhbnNmb3JtPSJyb3RhdGUoMzApIi8+CiAgICAgIDwvZz4KICAgICAgPHVzZSB4bGluazpocmVmPSIjaW4tYyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdHJhbnNmb3JtPSJyb3RhdGUoNjApIi8+CiAgICA8L2c+CiAgICA8dXNlIHhsaW5rOmhyZWY9IiNpbi1kIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB0cmFuc2Zvcm09InJvdGF0ZSgxMjApIi8+CiAgICA8dXNlIHhsaW5rOmhyZWY9IiNpbi1kIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB0cmFuc2Zvcm09InJvdGF0ZSgtMTIwKSIvPgogIDwvZz4KPC9zdmc+Cg==","ae":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWFlIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iIzAwNzMyZiIgZD0iTTAgMGg2NDB2MTYwSDB6Ii8+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMTYwaDY0MHYxNjBIMHoiLz4KICA8cGF0aCBmaWxsPSIjMDAwMDAxIiBkPSJNMCAzMjBoNjQwdjE2MEgweiIvPgogIDxwYXRoIGZpbGw9InJlZCIgZD0iTTAgMGgyMjB2NDgwSDB6Ii8+Cjwvc3ZnPgo=","bh":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWJoIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMGg2NDB2NDgwSDAiLz4KICA8cGF0aCBmaWxsPSIjY2UxMTI2IiBkPSJNNjQwIDBIOTZsMTEwLjcgNDhMOTYgOTZsMTEwLjcgNDhMOTYgMTkybDExMC43IDQ4TDk2IDI4OGwxMTAuNyA0OEw5NiAzODRsMTEwLjcgNDhMOTYgNDgwaDU0NCIvPgo8L3N2Zz4K","ma":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLW1hIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2MxMjcyZCIgZD0iTTY0MCAwSDB2NDgwaDY0MHoiLz4KICA8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDYyMzMiIHN0cm9rZS13aWR0aD0iMTEuNyIgZD0iTTMyMCAxNzkuNCAyODQuNCAyODlsOTMuMi02Ny42SDI2Mi40bDkzLjIgNjcuNnoiLz4KPC9zdmc+Cg==","ph":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLXBoIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iIzAwMzhhOCIgZD0iTTAgMGg2NDB2MjQwSDB6Ii8+CiAgPHBhdGggZmlsbD0iI2NlMTEyNiIgZD0iTTAgMjQwaDY0MHYyNDBIMHoiLz4KICA8cGF0aCBmaWxsPSIjZmZmIiBkPSJNNDE1LjcgMjQwIDAgNDgwVjAiLz4KICA8cGF0aCBmaWxsPSIjZmNkMTE2IiBkPSJNMjYuNyA0Mi40IDQxIDU1bDE2LjYtOS4yLTcuNCAxNy41IDE0IDEzLTE5LTEuNi04LjEgMTcuMi00LjMtMTguNUwxNCA3MWwxNi4zLTEwem0zMjMuOCAxNzIuMy40IDE5IDE4IDYuMy0xOCA2LjItLjQgMTktMTEuNS0xNS4xLTE4LjIgNS41IDEwLjgtMTUuNi0xMC44LTE1LjYgMTguMiA1LjV6TTM3LjIgMzg4LjFsOCAxNy4yIDE5LTEuNi0xMy45IDEzIDcuNCAxNy41LTE2LjYtOS4xLTE0LjQgMTIuNCAzLjYtMTguN0wxNCA0MDlsMTguOS0yLjR6bTExNC4yLTI0OS02LjIgNi4yIDMuMSA0Ny0zIC4zLTUuNy00Mi45LTUuMSA1IDcuNiAzOC40YTQ3LjUgNDcuNSAwIDAgMC0xNy4yIDcuMWwtMjEuNy0zMi40SDk2bDI2LjQgMzQuM2E0OCA0OCAwIDAgMC0yLjQgMmwtMzEuMS0zNS41aC04Ljh2OC44bDM1LjQgMzEtMiAyLjUtMzQuMy0yNi4zdjcuMWwzMi41IDIxLjdjLTMuNCA1LjItNS45IDExLTcuMSAxNy4yTDY2LjMgMjIzbC01LjEgNSA0Mi45IDUuN2MtLjIgMS0uMyAyLjEtLjMgMy4xbC00Ny0zLTYuMiA2LjIgNi4yIDYuMiA0Ny0zLjEuMyAzLjEtNDIuOSA1LjcgNSA1IDM4LjQtNy42YTQ3LjUgNDcuNSAwIDAgMCA3LjEgMTcuMmwtMzIuNSAyMS43djcuMmwzNC4zLTI2LjNhNDggNDggMCAwIDAgMiAyLjRsLTM1LjQgMzF2OC44SDg5bDMxLTM1LjQgMi41IDJMOTYgMzEyLjJoNy4ybDIxLjctMzIuNWM1LjEgMy40IDExIDUuOSAxNy4yIDcuMWwtNy42IDM4LjQgNSA1IDUuNy00Mi45YzEgLjIgMiAuMyAzLjEuM2wtMyA0NyA2LjEgNi4yIDYuMy02LjItMy4xLTQ3IDMtLjMgNS43IDQzIDUuMS01LjEtNy42LTM4LjRhNDcuNSA0Ny41IDAgMCAwIDE3LjItNy4xbDIxLjcgMzIuNWg3LjJsLTI2LjQtMzQuM2E0OCA0OCAwIDAgMCAyLjQtMmwzMS4xIDM1LjRoOC44di04LjhsLTM1LjQtMzEgMi0yLjQgMzQuMyAyNi4zdi03LjJsLTMyLjUtMjEuN2MzLjQtNS4xIDUuOS0xMSA3LjEtMTcuMmwzOC4zIDcuNiA1LjEtNS00Mi45LTUuN2MuMi0xIC4zLTIgLjMtMy4xbDQ3IDMgNi4yLTYuMS02LjItNi4yLTQ3IDMtLjMtMyA0Mi45LTUuNy01LTUtMzguNCA3LjVhNDcuNSA0Ny41IDAgMCAwLTcuMS0xNy4ybDMyLjUtMjEuN3YtNy4xbC0zNC4zIDI2LjNhNDggNDggMCAwIDAtMi0yLjRsMzUuNC0zMXYtOC45SDIxNGwtMzEgMzUuNWE0OCA0OCAwIDAgMC0yLjUtMmwyNi40LTM0LjNoLTcuMkwxNzggMjAwLjJjLTUuMS0zLjQtMTEtNS45LTE3LjItNy4xbDcuNi0zOC4zLTUtNS01LjcgNDIuOC0zLjEtLjMgMy00N3oiLz4KPC9zdmc+Cg==","sg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLXNnIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPGRlZnM+CiAgICA8Y2xpcFBhdGggaWQ9InNnLWEiPgogICAgICA8cGF0aCBmaWxsLW9wYWNpdHk9Ii43IiBkPSJNMCAwaDY0MHY0ODBIMHoiLz4KICAgIDwvY2xpcFBhdGg+CiAgPC9kZWZzPgogIDxnIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1wYXRoPSJ1cmwoI3NnLWEpIj4KICAgIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0tMjAgMGg3MjB2NDgwSC0yMHoiLz4KICAgIDxwYXRoIGZpbGw9IiNkZjAwMDAiIGQ9Ik0tMjAgMGg3MjB2MjQwSC0yMHoiLz4KICAgIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xNDYgNDAuMmE4NC40IDg0LjQgMCAwIDAgLjggMTY1LjIgODYgODYgMCAwIDEtMTA2LjYtNTkgODYgODYgMCAwIDEgNTktMTA2YzE2LTQuNiAzMC44LTQuNyA0Ni45LS4yeiIvPgogICAgPHBhdGggZmlsbD0iI2ZmZiIgZD0ibTEzMyAxMTAgNC45IDE1LTEzLTkuMi0xMi44IDkuNCA0LjctMTUuMi0xMi44LTkuMyAxNS45LS4yIDUtMTUgNSAxNWgxNS44em0xNy41IDUyIDUgMTUuMS0xMy05LjItMTIuOSA5LjMgNC44LTE1LjEtMTIuOC05LjQgMTUuOS0uMSA0LjktMTUuMSA1IDE1aDE2em01OC41LS40IDQuOSAxNS4yLTEzLTkuMy0xMi44IDkuMyA0LjctMTUuMS0xMi44LTkuMyAxNS45LS4yIDUtMTUgNSAxNWgxNS44em0xNy40LTUxLjYgNC45IDE1LjEtMTMtOS4yLTEyLjggOS4zIDQuOC0xNS4xLTEyLjktOS40IDE2LS4xIDQuOC0xNS4xIDUgMTVoMTZ6bS00Ni4zLTM0LjMgNSAxNS4yLTEzLTkuMy0xMi45IDkuNCA0LjgtMTUuMi0xMi44LTkuNCAxNS44LS4xIDUtMTUuMSA1IDE1aDE2eiIvPgogIDwvZz4KPC9zdmc+Cg=="};
+
+(function(){
+  var NS = "http://www.w3.org/2000/svg";
+  var stage = document.getElementById('stage');
+  var lines = document.getElementById('lines');
+  var marks = document.getElementById('marks');
+  var pinsEl = document.getElementById('pins');
+  var IL = [1135, 419];
+
+  function el(tag, attrs, parent){ var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+
+  /* ---- fit stage to screen ---- */
+  function fit(){
+    var s = Math.min(innerWidth/1920, innerHeight/1080);
+    stage.style.transform = 'translate(' + (innerWidth-1920*s)/2 + 'px,' + (innerHeight-1080*s)/2 + 'px) scale(' + s + ')';
+  }
+  addEventListener('resize', fit); fit();
+
+  /* ---- draw strings, labels, flags, pins ---- */
+  var byId = {};
+  COUNTRIES.forEach(function(c){
+    byId[c.id] = c;
+    var d = 'M' + IL[0] + ' ' + IL[1] + ' Q' + c.ctrl[0] + ' ' + c.ctrl[1] + ' ' + c.pin[0] + ' ' + c.pin[1];
+    el('path', {d: d, 'class': 'string-shadow', transform: 'translate(2 3)'}, lines);
+    c.path = el('path', {d: d, 'class': 'string'}, lines);
+  });
+  COUNTRIES.forEach(function(c){
+    var len = c.path.getTotalLength(); c.path.style.setProperty('--len', len);
+    if (c.leader) el('path', {d: 'M' + c.pin[0] + ' ' + c.pin[1] + ' L' + c.leader[0] + ' ' + c.leader[1], 'class': 'leader'}, marks);
+    var g = el('g', {transform: 'translate(' + c.flag[0] + ' ' + c.flag[1] + ')'}, marks);
+    el('image', {href: FLAGS[c.id], width: 30, height: 22.5, preserveAspectRatio: 'none'}, g);
+    el('rect', {width: 30, height: 22.5, 'class': 'flag-frame'}, g);
+    var he = el('text', {x: c.label[0], y: c.label[1], 'text-anchor': c.label[2], 'class': 'label-he'}, marks); he.textContent = c.he;
+    var en = el('text', {x: c.label[0], y: c.label[1] + 13, 'text-anchor': c.label[2], 'class': 'label-en'}, marks); en.textContent = c.en;
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'pin' + (c.big ? ' big' : ''); b.style.left = c.pin[0] + 'px'; b.style.top = c.pin[1] + 'px';
+    b.setAttribute('aria-label', c.he + ' · ' + c.en);
+    b.addEventListener('click', function(){ openCountry(c.id); });
+    pinsEl.appendChild(b); c.btn = b;
+  });
+  var t1 = el('text', {x: 1135, y: 462, 'text-anchor': 'middle', 'class': 'label-he', style: 'font-size:21px;font-weight:800;fill:#0038B8;stroke-width:5'}, marks); t1.textContent = 'ישראל';
+  var t2 = el('text', {x: 1135, y: 477, 'text-anchor': 'middle', 'class': 'label-en', style: 'font-size:12px;fill:#0038B8'}, marks); t2.textContent = 'Israel';
+
+  /* ---- open / close ---- */
+  var pop = document.getElementById('pop'), scrim = document.getElementById('scrim');
+  var cards = {unit: document.getElementById('card-unit'), role: document.getElementById('card-role')};
+  var current = null;
+
+  function closeAll(){
+    current = null;
+    stage.classList.remove('focus');
+    COUNTRIES.forEach(function(c){ c.path.classList.remove('on'); c.btn.classList.remove('on'); });
+    pop.classList.remove('on'); scrim.classList.remove('on');
+    cards.unit.classList.remove('on'); cards.role.classList.remove('on');
+  }
+  function openCountry(id){
+    closeAll(); current = id;
+    var c = byId[id];
+    stage.classList.add('focus');
+    void c.path.getBoundingClientRect();
+    c.path.classList.add('on'); c.btn.classList.add('on');
+    document.getElementById('pop-flag').src = FLAGS[id];
+    document.getElementById('pop-he').textContent = c.he;
+    document.getElementById('pop-en').textContent = c.en;
+    document.getElementById('pop-tag-he').textContent = c.tag_he;
+    document.getElementById('pop-tag-en').textContent = c.tag_en;
+    document.getElementById('pop-fact-he').textContent = c.fact_he;
+    document.getElementById('pop-fact-en').textContent = c.fact_en;
+    pop.setAttribute('aria-label', c.he + ' · ' + c.en);
+    var W = 400, H = 260, x, y;
+    if (c.pin[0] < 1135) { x = c.pin[0] - W - 34; if (x < 40) x = c.pin[0] + 34; } else { x = c.pin[0] + 34; if (x + W > 1880) x = c.pin[0] - W - 34; }
+    y = Math.max(140, Math.min(c.pin[1] + 40, 1080 - H - 150));
+    if (c.pin[1] < 330) y = c.pin[1] + 50;
+    pop.style.left = x + 'px'; pop.style.top = y + 'px';
+    pop.style.transformOrigin = (x < c.pin[0] ? 'right' : 'left') + ' top';
+    pop.classList.add('on');
+  }
+  function openCard(which){
+    closeAll(); current = which;
+    scrim.classList.add('on'); cards[which].classList.add('on');
+  }
+  document.getElementById('chip-unit').addEventListener('click', function(){ openCard('unit'); });
+  document.getElementById('chip-role').addEventListener('click', function(){ openCard('role'); });
+  scrim.addEventListener('click', closeAll);
+  document.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', function(e){ e.stopPropagation(); closeAll(); }); });
+  document.getElementById('lines').addEventListener('click', closeAll);
+  stage.addEventListener('click', function(e){ if (e.target === stage || e.target.classList.contains('map')) closeAll(); });
+  addEventListener('keydown', function(e){ if (e.key === 'Escape') closeAll(); });
+
+  /* ---- optional interview content ---- */
+  if (CONFIG.dayInRole.length){
+    var ul = document.getElementById('day-list');
+    CONFIG.dayInRole.forEach(function(it){ var li = document.createElement('li'); li.textContent = it.he; var s = document.createElement('span'); s.className = 'en'; s.textContent = it.en || ''; li.appendChild(s); ul.appendChild(li); });
+    document.getElementById('day').hidden = false;
+  }
+  if (CONFIG.quotes.length){
+    var qs = document.getElementById('quotes');
+    CONFIG.quotes.forEach(function(it){ var d = document.createElement('div'); d.className = 'quote'; var q = document.createElement('q'); q.textContent = it.he; d.appendChild(q); if (it.en){ var e = document.createElement('div'); e.className = 'en'; e.style.fontSize = '12.5px'; e.textContent = it.en; d.appendChild(e); } var w = document.createElement('div'); w.className = 'who'; w.textContent = it.who || ''; d.appendChild(w); qs.appendChild(d); });
+    document.getElementById('quotes-wrap').hidden = false;
+  }
+
+  /* ---- QR to the game ---- */
+  (function(){
+    var box = document.getElementById('qr');
+    var url = CONFIG.gameUrl;
+    if (!url) { try { var u = new URL('game.html', location.href); if (/^https?:$/.test(u.protocol) && !/claude|anthropic|usercontent/.test(u.hostname)) url = u.href; } catch (e) {} }
+    if (url && window.qrcode) {
+      var qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+      box.innerHTML = qr.createSvgTag({cellSize: 3, margin: 0, scalable: true});
+      if (CONFIG.gameUrl) document.getElementById('play').href = url;
+    } else {
+      box.innerHTML = '<div class="noqr">קוד QR יופיע כשהאתר יעלה לרשת<br><span class="en" style="font-size:9px">QR appears once the site is hosted</span></div>';
+    }
+  })();
+
+  /* ---- full screen + keep screen awake ---- */
+  document.getElementById('fs').addEventListener('click', function(){
+    var d = document.documentElement;
+    if (document.fullscreenElement) { document.exitFullscreen && document.exitFullscreen().catch(function(){}); }
+    else if (d.requestFullscreen) { d.requestFullscreen().catch(function(){}); }
+  });
+  function wake(){ try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(function(){}); } catch (e) {} }
+  wake(); document.addEventListener('visibilitychange', function(){ if (!document.hidden) wake(); });
+
+  /* ---- autoplay ---- */
+  var sw = document.getElementById('auto'), statusEl = document.getElementById('status'), bar = document.getElementById('bar');
+  var ids = COUNTRIES.map(function(c){ return c.id; });
+  var seq;
+  var i = 0, auto = true, paused = false, stepTimer = null, gapTimer = null, idleTimer = null, idleLeft = 0, countdown = null;
+  try { if (localStorage.getItem('kc-autoplay') === 'off') auto = false; } catch (e) {}
+  if (/[?&]autoplay=off/.test(location.search) || location.hash === '#autoplay-off') auto = false;
+
+  /* Booth slideshow: tours 6 countries + one card here, then fades to the day timeline, which fades back. Each round starts where the last stopped. */
+  var showMode = location.hash === '#slideshow';
+  var showBtn = document.getElementById('show');
+  function buildSeq(){
+    if (showMode){
+      var off = 0;
+      try { off = parseInt(localStorage.getItem('kc-show-off') || '0', 10) || 0; localStorage.setItem('kc-show-off', String((off + 6) % ids.length)); } catch (e) {}
+      var picks = []; for (var q = 0; q < 6; q++) picks.push(ids[(off + q) % ids.length]);
+      seq = picks.concat([Math.floor(off / 6) % 2 ? 'role' : 'unit']);
+    } else {
+      seq = ids.slice(0, 6).concat(['unit'], ids.slice(6, 12), ['role'], ids.slice(12));
+    }
+    i = 0;
+  }
+  function leave(url){ document.body.classList.add('fadeout'); setTimeout(function(){ location.href = url; }, 650); }
+  function renderShow(){
+    showBtn.setAttribute('aria-pressed', showMode ? 'true' : 'false');
+    document.getElementById('show-he').textContent = showMode ? 'עצירת המצגת' : 'מצגת לדוכן';
+    document.getElementById('show-en').textContent = showMode ? 'Stop slideshow' : 'Booth slideshow';
+  }
+  showBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    showMode = !showMode;
+    try { location.hash = showMode ? 'slideshow' : ''; } catch (err) {}
+    renderShow(); buildSeq(); closeAll(); setAuto(true);
+  });
+  if (showMode){ auto = true; document.body.classList.add('fadein'); }
+  buildSeq(); renderShow();
+
+  function setStatus(he, en){ statusEl.innerHTML = ''; var b = document.createElement('span'); b.textContent = he; statusEl.appendChild(b); var e = document.createElement('span'); e.className = 'en'; e.textContent = en; statusEl.appendChild(e); }
+  function runBar(ms){ bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth; bar.style.transition = 'width ' + ms + 'ms linear'; bar.style.width = '100%'; }
+  function stopBar(){ bar.style.transition = 'none'; bar.style.width = '0'; }
+  function clearTimers(){ clearTimeout(stepTimer); clearTimeout(gapTimer); }
+  function step(){
+    if (!auto || paused) return;
+    var s = seq[i];
+    var ms = (s === 'unit' || s === 'role' ? CONFIG.autoplaySecondsPerCard : CONFIG.autoplaySecondsPerCountry) * 1000;
+    if (s === 'unit' || s === 'role') openCard(s); else openCountry(s);
+    if (showMode) setStatus('מצגת · ' + (i + 1) + '/' + seq.length + ' · ', 'Slideshow'); else setStatus('מציג · ', 'Playing');
+    runBar(ms);
+    stepTimer = setTimeout(function(){ closeAll(); gapTimer = setTimeout(function(){
+      i++;
+      if (showMode && i >= seq.length) { leave('day.html#slideshow'); return; }
+      if (i >= seq.length) i = 0;
+      step();
+    }, 900); }, ms);
+  }
+  function render(){
+    sw.setAttribute('aria-checked', auto ? 'true' : 'false');
+    if (!auto) { setStatus('כבוי · ', 'Off — tap the map to explore'); stopBar(); }
+  }
+  function setAuto(on){
+    if (!on && showMode){ showMode = false; try { location.hash = ''; } catch (e) {} renderShow(); buildSeq(); }
+    auto = on; paused = false; clearTimers(); clearInterval(countdown); clearTimeout(idleTimer);
+    try { localStorage.setItem('kc-autoplay', on ? 'on' : 'off'); } catch (e) {}
+    render(); if (on) { closeAll(); step(); }
+  }
+  sw.addEventListener('click', function(e){ e.stopPropagation(); setAuto(!auto); });
+  function userTouched(e){
+    if (!auto || (e && (sw.contains(e.target) || showBtn.contains(e.target)))) return;
+    paused = true; clearTimers(); stopBar(); clearTimeout(idleTimer); clearInterval(countdown);
+    idleLeft = CONFIG.resumeAfterIdleSeconds;
+    var tick = function(){ setStatus('בהשהיה · ' + idleLeft + ' ש׳ · ', 'Paused, resumes in ' + idleLeft + 's'); };
+    tick(); countdown = setInterval(function(){ idleLeft--; if (idleLeft >= 0) tick(); }, 1000);
+    idleTimer = setTimeout(function(){ clearInterval(countdown); paused = false; closeAll(); step(); }, CONFIG.resumeAfterIdleSeconds * 1000);
+  }
+  document.addEventListener('pointerdown', userTouched, true);
+  document.addEventListener('keydown', function(e){ if (e.key !== 'Escape') userTouched(e); }, true);
+  render(); if (auto) stepTimer = setTimeout(step, showMode ? 900 : 1500);
+})();
+</script>
+
+</body>
+</html>
